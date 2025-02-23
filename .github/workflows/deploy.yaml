@@ -19,6 +19,7 @@ jobs:
             script: |
               export NVM_DIR=~/.nvm
               source ~/.nvm/nvm.sh
+              exec /usr/bin/zsh
               cd ~/imasvn-portal-server
               git pull origin master
               git status
