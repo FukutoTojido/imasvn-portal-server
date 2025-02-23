@@ -28,7 +28,7 @@ const app = new Elysia()
 	.use(cors())
 	.group("/api", (app) =>
 		app
-			.get("/", () => "Hi")
+			.get("/", () => "Welcome to Ave Mujica.")
 			.use(auth)
 			.use(users)
 			.use(posts)
