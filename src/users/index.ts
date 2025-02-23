@@ -5,10 +5,8 @@ import getUserPosts from "./getUserPosts";
 import checkToken from "../middleware";
 import getMe from "./getMe";
 
-const users = new Elysia({ prefix: "users" })
-	.use(getUser)
-	.use(getMe)
-	.use(getAvatar)
-	.use(getUserPosts);
+const users = new Elysia().group("/users", (app) =>
+	app.use(getUser).use(getMe).use(getAvatar).use(getUserPosts),
+);
 
 export default users;
