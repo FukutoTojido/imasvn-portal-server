@@ -1,0 +1,27 @@
+name: imasvn-portal-server CD
+
+on:
+    push:
+        branches: [ master ]
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        steps:
+        - name: Deploy using ssh
+          uses: appleboy/ssh-action@master
+          with:
+            host: ${{ secrets.HOST }}
+            username: ${{ secrets.USERNAME }}
+            key: ${{ secrets.PRIVATE_KEY }}
+            port: 22
+            script: |
+              export NVM_DIR=~/.nvm
+              source ~/.nvm/nvm.sh
+              cd ~/imasvn-portal-server
+              git pull origin master
+              git status
+              bun install
+              bun run build
+              pm2 restart iimasvn-portal-server
