@@ -158,7 +158,7 @@ async function grantToken(code: string) {
 
 		return tokens;
 	} catch (e) {
-		console.error(e);
+		console.error((e as DiscordRESTError).response);
 		return null;
 	}
 }
