@@ -6,9 +6,19 @@
     "dev": "bun run --watch src/index.ts"
   },
   "dependencies": {
-    "elysia": "latest"
+    "@akashrajpurohit/snowflake-id": "^2.0.0",
+    "@aws-sdk/client-s3": "^3.750.0",
+    "@aws-sdk/s3-request-presigner": "^3.750.0",
+    "@elysiajs/cors": "^1.2.0",
+    "@elysiajs/swagger": "^1.2.0",
+    "discord-oauth2": "^2.12.1",
+    "elysia": "latest",
+    "mariadb": "^3.4.0",
+    "md5": "^2.3.0",
+    "mongodb": "^6.13.0"
   },
   "devDependencies": {
+    "@types/md5": "^2.3.5",
     "bun-types": "latest"
   },
   "module": "src/index.js"
