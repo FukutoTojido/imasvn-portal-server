@@ -25,4 +25,4 @@ jobs:
               git status
               bun install
               bun run build
-              pm2 restart iimasvn-portal-server
+              pm2 restart imasvn-portal-server
