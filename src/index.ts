@@ -25,15 +25,18 @@ const app = new Elysia()
 			},
 		}),
 	)
-	.get("/", () => "Hi")
-	.use(cors())
-	.use(auth)
-	.use(users)
-	.use(posts)
-	.use(whep)
-	.use(characters)
-	.use(emojis)
-	.use(ws)
+	.group("/api", (app) =>
+		app
+			.get("/", () => "Hi")
+			.use(cors())
+			.use(auth)
+			.use(users)
+			.use(posts)
+			.use(whep)
+			.use(characters)
+			.use(emojis)
+			.use(ws),
+	)
 	.listen(3001);
 
 console.log(
