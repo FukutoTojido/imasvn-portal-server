@@ -228,7 +228,7 @@ const getAuth = new Elysia().get(
 			});
 
 			return redirect(
-				`http://localhost:3000/auth?at=${tokens.access_token}&rt=${tokens.refresh_token}&atExpire=${atExpire.getTime()}&rtExpire=${rtExpire.getTime()}`,
+				`${import.meta.env.WEB_URL}/auth?at=${tokens.access_token}&rt=${tokens.refresh_token}&atExpire=${atExpire.getTime()}&rtExpire=${rtExpire.getTime()}`,
 			);
 		} catch (e) {
 			console.error(e);
