@@ -25,6 +25,7 @@ const app = new Elysia()
 			},
 		}),
 	)
+	.get("/", () => "Hi")
 	.use(cors())
 	.use(auth)
 	.use(users)
