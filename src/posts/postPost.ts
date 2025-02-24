@@ -62,7 +62,7 @@ const postPost = new Elysia().post(
 				);
 			}
 
-			return postId;
+			return { postId };
 		} catch (e) {
 			console.error(e);
 			return error(500, "Internal Server Error");
