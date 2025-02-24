@@ -22,7 +22,7 @@ const ws = new Elysia().ws("/", {
 
 		switch (type) {
 			case SOCKET_ENUM.NEW_MESSAGE: {
-				ws.send(JSON.stringify(message));
+				ws.publish("broadcast", JSON.stringify(message));
 				break;
 			}
 			case SOCKET_ENUM.NEW_USER: {
