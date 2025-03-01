@@ -18,6 +18,7 @@ export const getMeInfo = async (token?: string) => {
 		avatar: userData.avatar,
 		banner: userData.banner,
 		isJoinedServer: userData.joined,
+		role: userData.role
 	};
 };
 

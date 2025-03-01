@@ -9,6 +9,7 @@ import whep from "./whep";
 import auth from "./auth";
 import cors from "@elysiajs/cors";
 import ws from "./ws";
+import preview from "./preview";
 
 const app = new Elysia()
 	.use(
@@ -20,7 +21,7 @@ const app = new Elysia()
 					{ name: "Posts" },
 					{ name: "Characters" },
 					{ name: "Emojis" },
-					{ name: "WHEP" },
+					{ name: "Live" },
 				],
 			},
 		}),
@@ -33,6 +34,7 @@ const app = new Elysia()
 			.use(users)
 			.use(posts)
 			.use(whep)
+			.use(preview)
 			.use(characters)
 			.use(emojis)
 			.use(ws),

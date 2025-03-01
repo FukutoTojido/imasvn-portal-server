@@ -26,7 +26,7 @@ const whep = new Elysia({ prefix: "/whep" }).post(
 			sdp: t.String(),
 		}),
         detail: {
-			tags: ["WHEP"]
+			tags: ["Live"]
 		}
 	},
 );

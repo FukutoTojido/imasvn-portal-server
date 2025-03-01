@@ -20,4 +20,24 @@ const checkToken = async (token?: string) => {
 	return user.uid;
 };
 
+const checkPrivillage = async (token?: string) => {
+	if (!token) return false;
+	const hashed = md5(token);
+
+	const [user] = await getConnection().query(
+		"SELECT (uid) FROM hash_token WHERE hash=?",
+		[hashed],
+	);
+	if (!user) return false;
+
+	const [userData] = await getConnection().query(
+		"SELECT (role) FROM users WHERE id=?",
+		[user.uid],
+	);
+	if (userData.role !== 1) return false;
+
+	return user.uid;
+};
+
 export default checkToken;
+export { checkPrivillage };
