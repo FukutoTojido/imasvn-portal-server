@@ -9,11 +9,7 @@ import {
 
 const userSet = new Map();
 
-const ws = new Elysia({
-	websocket: {
-		idleTimeout: 86400,
-	},
-}).ws("/", {
+const ws = new Elysia().ws("/", {
 	open(ws) {
 		// console.log(`[OPEN]: ${ws.id}`);
 		ws.subscribe("broadcast");
@@ -25,6 +21,9 @@ const ws = new Elysia({
 		};
 
 		switch (type) {
+			case SOCKET_ENUM.PING: {
+				break;
+			}
 			case SOCKET_ENUM.NEW_MESSAGE: {
 				ws.send(JSON.stringify(message));
 				ws.publish("broadcast", JSON.stringify(message));
