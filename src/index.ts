@@ -13,7 +13,7 @@ import preview from "./preview";
 
 const app = new Elysia({
 	websocket: {
-		idleTimeout: 86400,
+		idleTimeout: 960,
 	},
 })
 	.use(
