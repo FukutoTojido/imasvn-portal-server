@@ -9,7 +9,11 @@ import {
 
 const userSet = new Map();
 
-const ws = new Elysia().ws("/", {
+const ws = new Elysia({
+	websocket: {
+		idleTimeout: 86400,
+	},
+}).ws("/", {
 	open(ws) {
 		// console.log(`[OPEN]: ${ws.id}`);
 		ws.subscribe("broadcast");
@@ -66,7 +70,7 @@ const ws = new Elysia().ws("/", {
 	},
 	close(ws) {
 		// console.log(`[CLOSE]: ${ws.id}`);
-        userSet.delete(ws.id);
+		userSet.delete(ws.id);
 		ws.unsubscribe("broadcast");
 	},
 });
