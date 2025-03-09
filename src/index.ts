@@ -11,7 +11,11 @@ import cors from "@elysiajs/cors";
 import ws from "./ws";
 import preview from "./preview";
 
-const app = new Elysia()
+const app = new Elysia({
+	websocket: {
+		idleTimeout: 86400,
+	},
+})
 	.use(
 		swagger({
 			documentation: {
