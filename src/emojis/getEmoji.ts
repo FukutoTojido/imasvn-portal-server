@@ -1,11 +1,11 @@
 import { Elysia, t } from "elysia";
-import { getMongoConntection } from "../connection";
+import { getMongoConnection } from "../connection";
 
 const getEmoji = new Elysia().get(
 	"/:name",
 	async ({ params: { name }, error, redirect }) => {
 		try {
-			const db = getMongoConntection().db(process.env.MONGO_DB);
+			const db = getMongoConnection().db(process.env.MONGO_DB);
 			const collection = db.collection("emojis");
 
 			const emoji = await collection.findOne(

@@ -1,5 +1,5 @@
 import { Elysia, t } from "elysia";
-import { getMongoConntection } from "../connection";
+import { getMongoConnection } from "../connection";
 
 const monthArray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 const getCharacters = new Elysia().get(
@@ -55,7 +55,7 @@ const getCharacters = new Elysia().get(
 						}
 					: {};
 
-			const chars = getMongoConntection()
+			const chars = getMongoConnection()
 				.db(process.env.MONGO_DB)
 				.collection("characters")
 				.find(

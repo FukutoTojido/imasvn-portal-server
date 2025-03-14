@@ -16,6 +16,6 @@ export function getConnection() {
 	return pool;
 }
 
-export function getMongoConntection() {
+export function getMongoConnection() {
 	return client;
 }

@@ -1,11 +1,11 @@
 import { Elysia, t } from "elysia";
-import { getMongoConntection } from "../connection";
+import { getMongoConnection } from "../connection";
 
 const getCharacter = new Elysia().get(
 	"/:id",
 	async ({ params: { id }, error }) => {
 		try {
-			const char = await getMongoConntection()
+			const char = await getMongoConnection()
 				.db(process.env.MONGO_DB)
 				.collection("characters")
 				.findOne(
