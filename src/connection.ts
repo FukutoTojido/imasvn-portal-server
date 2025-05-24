@@ -6,6 +6,7 @@ const pool = mariadb.createPool({
 	user: process.env.DATABASE_USER,
 	password: process.env.DATABASE_PWD,
 	database: process.env.DATABASE_DB,
+	allowPublicKeyRetrieval: true
 });
 
 const uri = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PWD}@${process.env.MONGO_HOST}:${process.env.MONGO_PORT}/${process.env.MONGO_PARAMS}`;
