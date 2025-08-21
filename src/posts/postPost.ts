@@ -1,18 +1,18 @@
-import { Elysia, t } from "elysia";
-import r2 from "../lib/r2";
-import { getConnection } from "../connection";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { SnowflakeId } from "@akashrajpurohit/snowflake-id";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { Elysia, t } from "elysia";
+import { getConnection } from "../connection";
+import r2 from "../lib/r2";
 import checkToken from "../middleware";
 
 const snowflake = SnowflakeId();
-const getImageUrl = async ({ file, uid }: { file: File; uid: string }) => {
+export const getImageUrl = async ({ file, uid, fileNameOverwrite }: { file: File; uid: string, fileNameOverwrite?: string }) => {
 	if (!file || file.size === 0) {
 		return null;
 	}
 
-	const fileName = `${uid}-${file.name}`;
+	const fileName = fileNameOverwrite ?? `${uid}-${file.name}`;
 	const signedUrl = await getSignedUrl(
 		r2,
 		new PutObjectCommand({
