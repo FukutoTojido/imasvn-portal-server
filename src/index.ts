@@ -10,6 +10,7 @@ import producerId from "./producerId";
 import users from "./users";
 import whep from "./whep";
 import ws from "./ws";
+import events from "./events";
 
 const app = new Elysia({
 	websocket: {
@@ -42,7 +43,8 @@ const app = new Elysia({
 			.use(characters)
 			.use(emojis)
 			.use(ws)
-			.use(producerId),
+			.use(producerId)
+			.use(events),
 	)
 	.listen(3001);
 
