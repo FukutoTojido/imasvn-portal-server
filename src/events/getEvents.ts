@@ -5,7 +5,7 @@ const getEvents = new Elysia().get(
 	"/",
 	async ({ error }) => {
 		try {
-			const events = await getConnection().query(`SELECT * FROM events`);
+			const events = await getConnection().query(`SELECT * FROM events ORDER BY startDate DESC`);
 			return events;
 		} catch (e) {
 			console.error(e);
