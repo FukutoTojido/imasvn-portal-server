@@ -29,3 +29,8 @@ export type Viewer = {
 	username: string;
     id: string
 };
+
+export enum ROLE {
+	NORMAL = 0,
+	ADMIN = 1
+}

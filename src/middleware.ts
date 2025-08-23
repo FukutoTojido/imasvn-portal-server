@@ -1,5 +1,6 @@
 import { getConnection } from "./connection";
 import md5 from "md5";
+import { ROLE } from "./types";
 
 const checkToken = async (token?: string) => {
 	if (!token) return false;
@@ -34,7 +35,7 @@ const checkPrivillage = async (token?: string) => {
 		"SELECT (role) FROM users WHERE id=?",
 		[user.uid],
 	);
-	if (userData.role !== 1) return false;
+	if (userData.role !== ROLE.ADMIN) return false;
 
 	return user.uid;
 };
