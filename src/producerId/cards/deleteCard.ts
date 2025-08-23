@@ -1,5 +1,6 @@
 import { Elysia, t } from "elysia";
 import { getConnection } from "../../connection";
+import { checkPrivillage } from "../../middleware";
 
 const deleteCard = new Elysia().delete(
 	"/:cid",
@@ -19,6 +20,10 @@ const deleteCard = new Elysia().delete(
 		}),
 		detail: {
 			tags: ["Producer ID"],
+		},
+		async beforeHandle({ cookie, error }) {
+			if (!(await checkPrivillage(cookie.refresh_token.value)))
+				return error(401, "Unauthorized");
 		},
 	},
 );

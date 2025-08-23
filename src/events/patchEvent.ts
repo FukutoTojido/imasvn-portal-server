@@ -1,6 +1,7 @@
 import { Elysia, t } from "elysia";
 import { getConnection } from "../connection";
 import { getImageUrl } from "../posts/postPost";
+import { checkPrivillage } from "../middleware";
 
 const patchEvent = new Elysia().patch(
 	"/:id",
@@ -85,6 +86,10 @@ const patchEvent = new Elysia().patch(
 		}),
 		detail: {
 			tags: ["Events"],
+		},
+		async beforeHandle({ cookie, error }) {
+			if (!(await checkPrivillage(cookie.refresh_token.value)))
+				return error(401, "Unauthorized");
 		},
 	},
 );

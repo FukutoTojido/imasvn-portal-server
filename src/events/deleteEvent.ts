@@ -1,5 +1,6 @@
 import { Elysia, t } from "elysia";
 import { getConnection } from "../connection";
+import { checkPrivillage } from "../middleware";
 
 const deleteEvent = new Elysia().delete(
 	"/:id",
@@ -16,9 +17,13 @@ const deleteEvent = new Elysia().delete(
 		params: t.Object({
 			id: t.Number(),
 		}),
-        detail: {
-            tags: ["Events"]
-        }
+		detail: {
+			tags: ["Events"],
+		},
+		async beforeHandle({ cookie, error }) {
+			if (!(await checkPrivillage(cookie.refresh_token.value)))
+				return error(401, "Unauthorized");
+		},
 	},
 );
 
