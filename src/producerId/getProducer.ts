@@ -9,9 +9,16 @@ const getProducer = new Elysia().get(
 				`SELECT id, name FROM producer_id WHERE id=?`,
 				[id],
 			);
+			const [events] = await getConnection().query(
+				`SELECT COUNT(eventId) as events FROM eventParticipants WHERE pid=?`,
+				[id],
+			);
 			if (!producer) return error(404, "Not Found");
 
-			return producer;
+			return {
+				...producer,
+				events: Number(events ?? 0),
+			};
 		} catch (e) {
 			console.error(e);
 			error(500, "Internal Server Error");
