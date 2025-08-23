@@ -6,7 +6,7 @@ const getUsers = new Elysia().get(
 	async ({ error }) => {
 		try {
 			const users = await getConnection().query(
-				"SELECT id, avatar, username, role FROM users",
+				"SELECT id, avatar, username, role FROM users ORDER BY username ASC",
 			);
 			return users;
 		} catch (e) {
