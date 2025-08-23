@@ -17,7 +17,7 @@ const getProducer = new Elysia().get(
 
 			return {
 				...producer,
-				events: Number(events ?? 0),
+				events: Number(events?.events ?? 0),
 			};
 		} catch (e) {
 			console.error(e);
