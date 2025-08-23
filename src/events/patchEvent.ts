@@ -36,9 +36,11 @@ const patchEvent = new Elysia().patch(
 				],
 			);
 
-			const participants = Array.isArray(rest["participants[]"])
-				? rest["participants[]"]
-				: [rest["participants[]"]];
+			const participants = rest["participants[]"]
+				? Array.isArray(rest["participants[]"])
+					? rest["participants[]"]
+					: [rest["participants[]"]]
+				: [];
 
 			const previousParticipants = await getConnection().query(
 				`SELECT pid FROM eventParticipants WHERE eventId=?`,

@@ -26,14 +26,17 @@ const postEvent = new Elysia().post(
 				id,
 			]);
 
-			const participants = Array.isArray(rest["participants[]"])
-				? rest["participants[]"]
-				: [rest["participants[]"]];
+			const participants = rest["participants[]"]
+				? Array.isArray(rest["participants[]"])
+					? rest["participants[]"]
+					: [rest["participants[]"]]
+				: [];
 
-			await getConnection().batch(
-				`INSERT INTO eventParticipants (eventId, pid) VALUES (?, ?)`,
-				participants.map((participant) => [id, participant]),
-			);
+			if (participants.length)
+				await getConnection().batch(
+					`INSERT INTO eventParticipants (eventId, pid) VALUES (?, ?)`,
+					participants.map((participant) => [id, participant]),
+				);
 
 			return true;
 		} catch (e) {
