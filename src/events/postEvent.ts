@@ -4,14 +4,14 @@ import { getImageUrl } from "../posts/postPost";
 
 const postEvent = new Elysia().post(
 	"/",
-	async ({ body: { name, startDate, endDate, img }, error }) => {
+	async ({ body: { name, startDate, endDate, img, ...rest }, error }) => {
 		try {
 			await getConnection().query(
 				`INSERT INTO events (name, startDate, endDate) VALUES (?, ?, ?)`,
 				[name, startDate, endDate],
 			);
 
-			const [{id}] = await getConnection().query(
+			const [{ id }] = await getConnection().query(
 				"SELECT MAX(id) as `id` FROM events",
 			);
 			if (!id) return error(500, "Internal Server Error");
@@ -26,6 +26,15 @@ const postEvent = new Elysia().post(
 				id,
 			]);
 
+			const participants = Array.isArray(rest["participants[]"])
+				? rest["participants[]"]
+				: [rest["participants[]"]];
+
+			await getConnection().batch(
+				`INSERT INTO eventParticipants (eventId, pid) VALUES (?, ?)`,
+				participants.map((participant) => [id, participant]),
+			);
+
 			return true;
 		} catch (e) {
 			console.error(e);
@@ -38,6 +47,7 @@ const postEvent = new Elysia().post(
 			startDate: t.Date(),
 			endDate: t.Date(),
 			img: t.File(),
+			"participants[]": t.Optional(t.Union([t.String(), t.Array(t.String())])),
 		}),
 		detail: {
 			tags: ["Events"],

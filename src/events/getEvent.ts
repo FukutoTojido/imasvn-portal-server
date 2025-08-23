@@ -11,7 +11,18 @@ const getEvent = new Elysia().get(
 			);
 			if (!event) return error(404, "Event Not Found");
 
-			return event;
+			const participants = await getConnection().query(
+				`SELECT pid FROM eventParticipants WHERE eventId=?`,
+				[id],
+			);
+
+			return {
+				...event,
+				participants:
+					participants?.map(
+						(participant: { pid: string }) => participant.pid,
+					) ?? [],
+			};
 		} catch (e) {
 			console.error(e);
 			return error(500, "Internal Server Error");

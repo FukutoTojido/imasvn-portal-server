@@ -6,7 +6,7 @@ const patchEvent = new Elysia().patch(
 	"/:id",
 	async ({
 		params: { id },
-		body: { name, startDate, endDate, img },
+		body: { name, startDate, endDate, img, ...rest },
 		error,
 	}) => {
 		try {
@@ -36,6 +36,34 @@ const patchEvent = new Elysia().patch(
 				],
 			);
 
+			const participants = Array.isArray(rest["participants[]"])
+				? rest["participants[]"]
+				: [rest["participants[]"]];
+
+			const previousParticipants = await getConnection().query(
+				`SELECT pid FROM eventParticipants WHERE eventId=?`,
+				[id],
+			);
+			const previousSet = new Set(
+				previousParticipants.map(
+					(participant: { pid: string }) => participant.pid,
+				),
+			);
+			const currentSet = new Set(participants);
+
+			const removed = previousSet.difference(currentSet);
+			if (removed.size)
+				await getConnection().batch(
+					`DELETE FROM eventParticipants WHERE eventId=? AND pid=?`,
+					[...removed].map((pid) => [id, pid]),
+				);
+
+			if (currentSet.size)
+				await getConnection().batch(
+					`INSERT IGNORE INTO eventParticipants (eventId, pid) VALUES (?, ?)`,
+					participants.map((participant) => [id, participant]),
+				);
+
 			return true;
 		} catch (e) {
 			console.error(e);
@@ -51,6 +79,7 @@ const patchEvent = new Elysia().patch(
 			startDate: t.Optional(t.Date()),
 			endDate: t.Optional(t.Date()),
 			img: t.Optional(t.File()),
+			"participants[]": t.Optional(t.Union([t.String(), t.Array(t.String())])),
 		}),
 		detail: {
 			tags: ["Events"],
