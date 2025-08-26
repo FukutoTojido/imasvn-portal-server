@@ -9,15 +9,15 @@ const getProducer = new Elysia().get(
 				`SELECT id, name FROM producer_id WHERE id=?`,
 				[id],
 			);
-			const [events] = await getConnection().query(
-				`SELECT COUNT(eventId) as events FROM eventParticipants WHERE pid=?`,
+			const events = await getConnection().query(
+				`SELECT * FROM eventParticipants INNER JOIN events ON events.id=eventParticipants.eventId WHERE eventParticipants.pid=? ORDER BY startDate`,
 				[id],
 			);
 			if (!producer) return error(404, "Not Found");
 
 			return {
 				...producer,
-				events: Number(events?.events ?? 0),
+				events: events ?? []
 			};
 		} catch (e) {
 			console.error(e);
