@@ -1,5 +1,6 @@
 import { Elysia, t } from "elysia";
 import { getConnection } from "../../connection";
+import { checkPrivillage } from "../../middleware";
 
 const getCards = new Elysia().get(
 	"/",
@@ -21,6 +22,10 @@ const getCards = new Elysia().get(
 		}),
 		detail: {
 			tags: ["Card"],
+		},
+		async beforeHandle({ cookie, error }) {
+			if (!(await checkPrivillage(cookie.refresh_token.value)))
+				return error(401, "Unauthorized");
 		},
 	},
 );

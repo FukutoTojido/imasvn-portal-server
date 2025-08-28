@@ -1,9 +1,10 @@
-import { Elysia, t } from "elysia";
+import { Elysia } from "elysia";
 import { getConnection } from "../connection";
+import { checkPrivillage } from "../middleware";
 
 const getProducers = new Elysia().get(
 	"/",
-	async ({ query: { offset = 0 }, error }) => {
+	async ({ error }) => {
 		try {
 			const producers = await getConnection().query(
 				`SELECT id, name FROM producer_id ORDER BY name`,
@@ -15,11 +16,12 @@ const getProducers = new Elysia().get(
 		}
 	},
 	{
-		query: t.Object({
-			offset: t.Optional(t.Number()),
-		}),
 		detail: {
 			tags: ["Producer ID"],
+		},
+		async beforeHandle({ cookie, error }) {
+			if (!(await checkPrivillage(cookie.refresh_token.value)))
+				return error(401, "Unauthorized");
 		},
 	},
 );
