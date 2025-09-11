@@ -10,7 +10,7 @@ const getProducer = new Elysia().get(
 				[id],
 			);
 			const events = await getConnection().query(
-				`SELECT * FROM eventParticipants INNER JOIN events ON events.id=eventParticipants.eventId WHERE eventParticipants.pid=? ORDER BY startDate`,
+				`SELECT * FROM eventParticipants INNER JOIN events ON events.id=eventParticipants.eventId WHERE eventParticipants.pid=? ORDER BY startDate DESC`,
 				[id],
 			);
 			if (!producer) return error(404, "Not Found");

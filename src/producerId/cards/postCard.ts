@@ -1,7 +1,6 @@
 import { Elysia, t } from "elysia";
 import ShortUniqueId from "short-unique-id";
 import { getConnection } from "../../connection";
-import { getImageUrl } from "../../posts/postPost";
 import { checkPrivillage } from "../../middleware";
 
 const { randomUUID } = new ShortUniqueId({
@@ -9,10 +8,9 @@ const { randomUUID } = new ShortUniqueId({
 });
 const postCard = new Elysia().post(
 	"/",
-	async ({ params: { id: pid }, body: { name, idol, img, title }, error }) => {
+	async ({ params: { id: pid }, error }) => {
 		const ID = randomUUID(16);
 		try {
-			const imgUrl = await getImageUrl({ file: img, uid: ID, fileNameOverwrite: ID });
 			const [producer] = await getConnection().query(
 				`SELECT id, name FROM producer_id WHERE id=?`,
 				[pid],
@@ -20,8 +18,8 @@ const postCard = new Elysia().post(
 			if (!producer) return error(404, "Producer Not Found");
 
 			await getConnection().query(
-				"INSERT INTO `cards` (id, pid, name, idol, img, title) VALUES (?, ?, ?, ?, ?, ?)",
-				[ID, pid, producer.name ?? name, idol, imgUrl, title],
+				"INSERT INTO `cards` (id, pid, name) VALUES (?, ?, ?)",
+				[ID, pid, producer.name],
 			);
 
 			return ID;
@@ -33,12 +31,6 @@ const postCard = new Elysia().post(
 	{
 		params: t.Object({
 			id: t.String(),
-		}),
-		body: t.Object({
-			name: t.Optional(t.String()),
-			idol: t.String(),
-			img: t.File(),
-			title: t.String(),
 		}),
 		detail: {
 			tags: ["Card"],
