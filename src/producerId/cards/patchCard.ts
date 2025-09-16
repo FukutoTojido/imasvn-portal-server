@@ -6,10 +6,10 @@ import { getImageUrl } from "../../posts/postPost";
 
 const patchCard = new Elysia().patch(
 	"/:cid",
-	async ({ params: { cid }, body: { name, idol, img, title, idolJapanese, frontImg, backImg, event }, error }) => {
+	async ({ params: { cid }, body: { name, idol, img, title, idolJapanese, frontImg, backImg, event, config }, error }) => {
 		try {
 			const [cardInfo] = await getConnection().query(
-				"SELECT name, idol, img, title, frontImg, backImg, event FROM cards WHERE id=?",
+				"SELECT name, idol, img, title, frontImg, backImg, event, config FROM cards WHERE id=?",
 				[cid],
 			);
 			if (!cardInfo) return error(404, "Card not found");
@@ -27,7 +27,7 @@ const patchCard = new Elysia().patch(
 				: cardInfo.backImg;
 
 			await getConnection().query(
-				"UPDATE `cards` SET name=?, idol=?, img=?, title=?, idolJapanese=?, frontImg=?, backImg=?, event=? WHERE id=?",
+				"UPDATE `cards` SET name=?, idol=?, img=?, title=?, idolJapanese=?, frontImg=?, backImg=?, event=?, config=? WHERE id=?",
 				[
 					name ?? cardInfo.name,
 					idol ?? cardInfo.idol,
@@ -37,6 +37,7 @@ const patchCard = new Elysia().patch(
 					frontImgUrl,
 					backImgUrl,
 					event ?? cardInfo.event,
+					config ? config : null,
 					cid,
 				],
 			);
@@ -61,6 +62,11 @@ const patchCard = new Elysia().patch(
 			backImg: t.Optional(t.File()),
 			title: t.Optional(t.String()),
 			event: t.Optional(t.String()),
+			config: t.Optional(t.ObjectString({
+				x: t.Optional(t.String()),
+				y: t.Optional(t.String()),
+				scale: t.Optional(t.String()),
+			}))
 		}),
 		detail: {
 			tags: ["Card"],
