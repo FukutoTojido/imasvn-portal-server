@@ -15,6 +15,7 @@ export const getDiscordInfo = async (id: string) => {
 		avatar: userData.avatar,
 		banner: userData.banner,
 		isJoinedServer: userData.joined,
+		pid: userData.pid
 	};
 }
 

@@ -23,10 +23,6 @@ const getCards = new Elysia().get(
 		detail: {
 			tags: ["Card"],
 		},
-		async beforeHandle({ cookie, error }) {
-			if (!(await checkPrivillage(cookie.refresh_token.value)))
-				return error(401, "Unauthorized");
-		},
 	},
 );
 
