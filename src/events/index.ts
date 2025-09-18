@@ -1,4 +1,5 @@
 import { Elysia } from "elysia";
+import { privillage } from "../middleware";
 import deleteEvent from "./deleteEvent";
 import getEvent from "./getEvent";
 import getEvents from "./getEvents";
@@ -9,9 +10,9 @@ const events = new Elysia().group("/events", (app) =>
 	app
 		.use(getEvents)
 		.use(getEvent)
-		.use(postEvent)
-		.use(patchEvent)
-		.use(deleteEvent),
+		.group("", (app) =>
+			app.use(privillage).use(postEvent).use(patchEvent).use(deleteEvent),
+		),
 );
 
 export default events;

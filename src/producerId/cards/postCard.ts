@@ -1,7 +1,6 @@
 import { Elysia, t } from "elysia";
 import ShortUniqueId from "short-unique-id";
 import { getConnection } from "../../connection";
-import { checkPrivillage } from "../../middleware";
 
 const { randomUUID } = new ShortUniqueId({
 	dictionary: "alphanum_upper",
@@ -34,10 +33,6 @@ const postCard = new Elysia().post(
 		}),
 		detail: {
 			tags: ["Card"],
-		},
-		async beforeHandle({ cookie, error }) {
-			if (!(await checkPrivillage(cookie.refresh_token.value)))
-				return error(401, "Unauthorized");
 		},
 	},
 );

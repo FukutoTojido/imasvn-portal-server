@@ -1,41 +1,51 @@
 import { Elysia, t } from "elysia";
-import { refresh, updateDiscordInfo } from "./getAuth";
-import { getMeInfo } from "../users/getMe";
-import md5 from "md5";
 import { getConnection } from "../connection";
+import { jwtAccess } from "./setup";
 
-const authMe = new Elysia().get(
+const authMe = new Elysia().use(jwtAccess).get(
 	"/@me",
-	async ({ cookie, error }) => {
+	async ({ cookie: { access_token, refresh_token }, error, jwtAccess }) => {
 		try {
-			if (!cookie.refresh_token.value) return error(401, "Unauthorized");
+			if (!access_token.value) {
+				return error(401, "Unauthorized");
+			}
+
+			const payload = await jwtAccess.verify(access_token.value);
+			if (!payload) {
+				return error(403, "Forbidden");
+			}
+
+			const { id } = payload;
+
+			const [entry] = await getConnection().query(
+				"SELECT hash FROM hash_token WHERE uid=?",
+				[id],
+			);
+			if (
+				!entry ||
+				!refresh_token.value ||
+				!(await Bun.password.verify(refresh_token.value, entry.hash))
+			) {
+				return error(401, "Unauthorized");
+			}
 
 			const [user] = await getConnection().query(
-				"SELECT `uid` FROM `hash_token` WHERE hash=?",
-				[md5(cookie.refresh_token.value)],
+				"SELECT id, username, tag, avatar, banner, joined, role FROM `users` WHERE id=?",
+				[id],
 			);
-			if (!user) return error(500, "User not found");
+			if (!user) return error(403, "Forbidden");
 
-			const tokens = await refresh(cookie.refresh_token.value);
-			if (!tokens) return error(500, "Cannot refresh token");
-
-			await getConnection().query(
-				"UPDATE `hash_token` SET hash=? WHERE uid=?",
-				[md5(tokens.refresh_token), user.uid],
-			);
-
-			const discordInfo = await getMeInfo(tokens.refresh_token);
-			if (!discordInfo) return error(500, "Cannot get user info");
-
-			return {
-				...discordInfo,
-				tokens: {
-					access_token: tokens.access_token,
-					refresh_token: tokens.refresh_token,
-					atExpire: new Date(Date.now() + tokens.expires_in * 1000).getTime(),
-					rtExpire: new Date(Date.now() + 399 * 24 * 60 * 60 * 1000).getTime(),
-				},
+			const discordInfo = {
+				id: user.id,
+				name: user.username,
+				tag: user.tag,
+				avatar: user.avatar,
+				banner: user.banner,
+				isJoinedServer: user.joined,
+				role: user.role,
 			};
+
+			return discordInfo;
 		} catch (e) {
 			console.error(e);
 			return error(500, "Internal Server Error");

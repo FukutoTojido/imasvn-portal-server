@@ -1,12 +1,9 @@
 import { Elysia, t } from "elysia";
-import { checkPrivillage } from "../middleware";
 import { getConnection } from "../connection";
 
 const setPreview = new Elysia().post(
 	"/preview",
 	async ({ body: { title, url }, cookie: { refresh_token }, error }) => {
-		if (!(await checkPrivillage(refresh_token.value)))
-			return error(401, "Unauthorized");
 		try {
 			await getConnection().query("UPDATE `preview` SET title=?, url=?", [
 				title,

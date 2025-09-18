@@ -2,7 +2,6 @@ import { Elysia, t } from "elysia";
 import { getConnection } from "../connection";
 import r2 from "../lib/r2";
 import { DeleteObjectCommand } from "@aws-sdk/client-s3";
-import checkToken from "../middleware";
 import md5 from "md5";
 
 const deletePost = new Elysia().delete(
@@ -65,10 +64,6 @@ const deletePost = new Elysia().delete(
 		}),
 		detail: {
 			tags: ["Posts"],
-		},
-		async beforeHandle({ cookie, error }) {
-			if (!(await checkToken(cookie.refresh_token.value)))
-				return error(401, "Unauthorized");
 		},
 	},
 );

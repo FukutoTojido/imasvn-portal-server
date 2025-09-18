@@ -1,21 +1,21 @@
 import { Elysia } from "elysia";
+import { privillage } from "../middleware";
 import getAvatar from "./getAvatar";
-import getMe from "./getMe";
 import getUser from "./getUser";
 import getUserPosts from "./getUserPosts";
 import getUsers from "./getUsers";
-import patchUserRole from "./patchUserRole";
 import patchUserPID from "./patchUserPID";
+import patchUserRole from "./patchUserRole";
 
 const users = new Elysia().group("/users", (app) =>
 	app
 		.use(getUsers)
 		.use(getUser)
-		.use(getMe)
 		.use(getAvatar)
 		.use(getUserPosts)
-		.use(patchUserRole)
-		.use(patchUserPID),
+		.group("", (app) =>
+			app.use(privillage).use(patchUserRole).use(patchUserPID),
+		),
 );
 
 export default users;

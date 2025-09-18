@@ -4,7 +4,6 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Elysia, t } from "elysia";
 import { getConnection } from "../connection";
 import r2 from "../lib/r2";
-import checkToken from "../middleware";
 
 const snowflake = SnowflakeId();
 export const getImageUrl = async ({ file, uid, fileNameOverwrite }: { file: File; uid: string, fileNameOverwrite?: string }) => {
@@ -77,10 +76,6 @@ const postPost = new Elysia().post(
 		detail: {
 			tags: ["Posts"]
 		},
-		async beforeHandle({ cookie, error }) {
-			if (!(await checkToken(cookie.refresh_token.value)))
-				return error(401, "Unauthorized");
-		}
 	},
 );
 

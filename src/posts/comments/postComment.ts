@@ -1,7 +1,6 @@
 import { SnowflakeId } from "@akashrajpurohit/snowflake-id";
 import { Elysia, t } from "elysia";
 import { getConnection } from "../../connection";
-import checkToken from "../../middleware";
 import md5 from "md5";
 
 const snowflake = SnowflakeId();
@@ -48,10 +47,6 @@ const postComment = new Elysia().post(
 		}),
 		detail: {
 			tags: ["Posts"],
-		},
-		async beforeHandle({ cookie, error }) {
-			if (!(await checkToken(cookie.refresh_token.value)))
-				return error(401, "Unauthorized");
 		},
 	},
 );

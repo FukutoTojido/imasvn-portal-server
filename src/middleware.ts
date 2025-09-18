@@ -1,44 +1,52 @@
+import { Elysia } from "elysia";
+import { jwtAccess } from "./auth/setup";
 import { getConnection } from "./connection";
-import md5 from "md5";
 import { ROLE } from "./types";
 
-const checkToken = async (token?: string) => {
-	if (!token) return false;
-	const hashed = md5(token);
+export const token = new Elysia()
+	.use(jwtAccess)
+	.derive({ as: "scoped" }, async ({ jwtAccess, cookie: { access_token } }) => {
+		if (!access_token.value) {
+			throw new Error("Unauthorized");
+		}
 
-	const [user] = await getConnection().query(
-		"SELECT (uid) FROM hash_token WHERE hash=?",
-		[hashed],
-	);
-	if (!user) return false;
+		const payload = await jwtAccess.verify(access_token.value);
+		if (!payload) {
+			throw new Error("Forbidden");
+		}
 
-	const [userData] = await getConnection().query(
-		"SELECT (joined) FROM users WHERE id=?",
-		[user.uid],
-	);
-	if (!userData.joined) return false;
+		const [userData] = await getConnection().query(
+			"SELECT (role) FROM users WHERE id=?",
+			[payload.id],
+		);
 
-	return user.uid;
-};
+		if (!userData.joined) {
+			throw new Error("Forbidden");
+		}
 
-const checkPrivillage = async (token?: string) => {
-	if (!token) return false;
-	const hashed = md5(token);
+		return userData;
+	});
 
-	const [user] = await getConnection().query(
-		"SELECT (uid) FROM hash_token WHERE hash=?",
-		[hashed],
-	);
-	if (!user) return false;
+export const privillage = new Elysia()
+	.use(jwtAccess)
+	.derive({ as: "scoped" }, async ({ jwtAccess, cookie: { access_token } }) => {
+		if (!access_token.value) {
+			throw new Error("Unauthorized");
+		}
 
-	const [userData] = await getConnection().query(
-		"SELECT (role) FROM users WHERE id=?",
-		[user.uid],
-	);
-	if (userData.role !== ROLE.ADMIN) return false;
+		const payload = await jwtAccess.verify(access_token.value);
+		if (!payload) {
+			throw new Error("Forbidden");
+		}
 
-	return user.uid;
-};
+		const [userData] = await getConnection().query(
+			"SELECT (role) FROM users WHERE id=?",
+			[payload.id],
+		);
 
-export default checkToken;
-export { checkPrivillage };
+		if (userData.role !== ROLE.ADMIN) {
+			throw new Error("Forbidden");
+		}
+
+		return userData;
+	});

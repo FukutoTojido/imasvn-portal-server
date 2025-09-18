@@ -1,7 +1,7 @@
-import { Elysia, t } from "elysia";
 import DiscordOauth2, { type DiscordRESTError } from "discord-oauth2";
+import { Elysia, t } from "elysia";
 import { getConnection } from "../connection";
-import md5 from "md5";
+import { jwtAccess, jwtRefresh } from "./setup";
 
 const urlFactory = (
 	{
@@ -77,7 +77,7 @@ async function getDiscordInfo(access_token: string) {
 	}
 }
 
-export async function updateDiscordInfo(access_token: string, refresh_token: string) {
+export async function updateDiscordInfo(access_token: string) {
 	try {
 		const discordInfo = await getDiscordInfo(access_token);
 		if (!discordInfo) return null;
@@ -104,30 +104,22 @@ export async function updateDiscordInfo(access_token: string, refresh_token: str
 			"banners",
 		);
 
-		const [user] = await getConnection().query(
-			"SELECT * FROM `users` WHERE id=?",
-			[me.id],
+		await getConnection().query(
+			"INSERT INTO `users` (id, username, avatar, banner, tag, joined) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE username=?, avatar=?, banner=?, tag=?, joined=?",
+			[
+				me.id,
+				username,
+				avatar,
+				banner,
+				me.username,
+				guild !== null,
+				username,
+				avatar,
+				banner,
+				me.username,
+				guild !== null,
+			],
 		);
-
-		if (!user) {
-			await getConnection().query(
-				"INSERT INTO `users` (id, username, avatar, banner, tag, joined) VALUES (?, ?, ?, ?, ?, ?)",
-				[me.id, username, avatar, banner, me.username, guild !== null],
-			);
-			await getConnection().query(
-				"INSERT INTO `hash_token` (uid, hash) VALUES (?, ?)",
-				[me.id, md5(refresh_token)],
-			);
-		} else {
-			await getConnection().query(
-				"UPDATE `users` SET username=?, avatar=?, banner=?, tag=?, joined=? WHERE id=?",
-				[username, avatar, banner, me.username, guild !== null, me.id],
-			);
-			await getConnection().query(
-				"UPDATE `hash_token` SET hash=? WHERE uid=?",
-				[md5(refresh_token), me.id],
-			);
-		}
 
 		return {
 			id: me.id,
@@ -163,90 +155,78 @@ async function grantToken(code: string) {
 	}
 }
 
-export async function refresh(refresh_token: string) {
-	const oauth = new DiscordOauth2();
-	// console.log(refresh_token);
+const getAuth = new Elysia()
+	.use(jwtAccess)
+	.use(jwtRefresh)
+	.get(
+		"/",
+		async ({
+			query: { code },
+			error,
+			redirect,
+			jwtAccess,
+			jwtRefresh,
+			cookie,
+		}) => {
+			try {
+				if (!code) {
+					return error(401, null);
+				}
 
-	try {
-		const tokens = await oauth.tokenRequest({
-			clientId: process.env.DISCORD_CLIENT_ID,
-			clientSecret: process.env.DISCORD_CLIENT_SECRET,
-			redirectUri: process.env.REDIRECT_URL,
-			scope: "identify guilds guilds.members.read",
-			grantType: "refresh_token",
-			refreshToken: refresh_token,
-		});
+				const tokens = await grantToken(code);
 
-        // console.log(tokens);
+				if (tokens === null) return redirect(process.env.LOGIN_URL ?? "");
+				const access_token = tokens.access_token;
 
-		return tokens;
-	} catch (e) {
-		console.error((e as DiscordRESTError).response);
-		return null;
-	}
-}
+				const discordInfo = await updateDiscordInfo(access_token);
+				if (!discordInfo) throw "Cannot update Discord info";
 
-const getAuth = new Elysia().get(
-	"/",
-	async ({ query: { code }, error, redirect, cookie }) => {
-		try {
-			let access_token = cookie.access_token.value;
-			let refresh_token = cookie.refresh_token.value;
+				const at = await jwtAccess.sign({ id: discordInfo.id });
+				const rt = await jwtRefresh.sign({ id: discordInfo.id });
+				const hashed = await Bun.password.hash(rt);
 
-			if (!refresh_token && !code) {
-				return error(401, null);
+				await getConnection().query(
+					"INSERT INTO `hash_token` (uid, hash) VALUES (?, ?) ON DUPLICATE KEY UPDATE hash=?",
+					[discordInfo.id, hashed, hashed],
+				);
+
+				const atExpire = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+				const rtExpire = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+
+				cookie.access_token.set({
+					value: at,
+					sameSite: "lax",
+					httpOnly: true,
+					secure: true,
+					expires: atExpire,
+				});
+
+				cookie.refresh_token.set({
+					value: rt,
+					sameSite: "lax",
+					secure: true,
+					httpOnly: true,
+					expires: rtExpire,
+				});
+
+				return redirect(`${import.meta.env.WEB_URL}`);
+			} catch (e) {
+				console.error(e);
+				return error(500, "Internal Server Error");
 			}
-
-			const tokens = code
-				? await grantToken(code)
-				: refresh_token
-					? await refresh(refresh_token)
-					: null;
-
-			if (tokens === null) return redirect(process.env.LOGIN_URL ?? "");
-			access_token = tokens.access_token;
-			refresh_token = tokens.refresh_token;
-
-			const discordInfo = await updateDiscordInfo(access_token, refresh_token);
-			if (!discordInfo) throw "Cannot update Discord info";
-
-			const atExpire = new Date(Date.now() + tokens.expires_in * 1000);
-			const rtExpire = new Date(Date.now() + 399 * 24 * 60 * 60 * 1000);
-
-			cookie.access_token.set({
-				value: tokens.access_token,
-				sameSite: "strict",
-				secure: true,
-				expires: atExpire,
-			});
-
-			cookie.refresh_token.set({
-				value: tokens.refresh_token,
-				sameSite: "strict",
-				secure: true,
-				expires: rtExpire,
-			});
-
-			return redirect(
-				`${import.meta.env.WEB_URL}/auth?at=${tokens.access_token}&rt=${tokens.refresh_token}&atExpire=${atExpire.getTime()}&rtExpire=${rtExpire.getTime()}`,
-			);
-		} catch (e) {
-			console.error(e);
-			return error(500, "Internal Server Error");
-		}
-	},
-	{
-		query: t.Object({
-			code: t.Optional(t.String()),
-		}),
-		detail: {
-			tags: ["Auth"],
 		},
-		cookie: t.Object({
-			access_token: t.Optional(t.String()),
-			refresh_token: t.Optional(t.String()),
-		}),
-	},
-);
+		{
+			query: t.Object({
+				code: t.Optional(t.String()),
+			}),
+			detail: {
+				tags: ["Auth"],
+			},
+			cookie: t.Object({
+				access_token: t.Optional(t.String()),
+				refresh_token: t.Optional(t.String()),
+			}),
+		},
+	);
 
 export default getAuth;

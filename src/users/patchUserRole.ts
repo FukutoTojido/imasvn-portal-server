@@ -1,7 +1,6 @@
 import { Elysia, t } from "elysia";
-import { checkPrivillage } from "../middleware";
-import { ROLE } from "../types";
 import { getConnection } from "../connection";
+import { ROLE } from "../types";
 
 const patchUserRole = new Elysia().patch(
 	"/:id/roles",
@@ -24,10 +23,6 @@ const patchUserRole = new Elysia().patch(
 		body: t.Object({
 			role: t.Enum(ROLE),
 		}),
-		async beforeHandle({ cookie, error }) {
-			if (!(await checkPrivillage(cookie.refresh_token.value)))
-				return error(401, "Unauthorized");
-		},
 		detail: {
 			tags: ["Users"],
 		},

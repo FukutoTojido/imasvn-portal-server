@@ -1,6 +1,5 @@
 import { Elysia, t } from "elysia";
 import { getConnection } from "../../connection";
-import { checkPrivillage } from "../../middleware";
 
 const getCards = new Elysia().get(
 	"/",

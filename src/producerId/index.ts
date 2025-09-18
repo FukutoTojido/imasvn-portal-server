@@ -4,13 +4,18 @@ import getProducer from "./getProducer";
 import getProducers from "./getProducers";
 import postProducer from "./postProducer";
 import deleteProducer from "./deleteProducer";
+import { privillage } from "../middleware";
 
 const producerId = new Elysia().group("/producer-id", (app) =>
 	app
-		.use(getProducers)
 		.use(getProducer)
-		.use(postProducer)
-		.use(deleteProducer)
+		.group("", (app) =>
+			app
+				.use(privillage)
+				.use(getProducers)
+				.use(postProducer)
+				.use(deleteProducer),
+		)
 		.use(cards),
 );
 

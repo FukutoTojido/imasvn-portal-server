@@ -1,6 +1,5 @@
 import { Elysia, t } from "elysia";
 import { getConnection } from "../connection";
-import { checkPrivillage } from "../middleware";
 
 const patchUserPID = new Elysia().patch(
 	"/:id/pid",
@@ -23,10 +22,6 @@ const patchUserPID = new Elysia().patch(
 		body: t.Object({
 			pid: t.Optional(t.Union([t.String(), t.Null()])),
 		}),
-		async beforeHandle({ cookie, error }) {
-			if (!(await checkPrivillage(cookie.refresh_token.value)))
-				return error(401, "Unauthorized");
-		},
 		detail: {
 			tags: ["Users"],
 		},

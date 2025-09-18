@@ -1,25 +1,16 @@
 import { Elysia, t } from "elysia";
-import { getMongoConnection } from "../connection";
+import { getConnection } from "../connection";
 
 const getCharacter = new Elysia().get(
 	"/:id",
 	async ({ params: { id }, error }) => {
 		try {
-			const char = await getMongoConnection()
-				.db(process.env.MONGO_DB)
-				.collection("characters")
-				.findOne(
-					{
-						Index: id,
-					},
-					{
-						projection: {
-							_id: false,
-						},
-					},
-				);
-
+			const [char] = await getConnection().query(
+				"SELECT * FROM idols WHERE id=?",
+				[id],
+			);
 			if (!char) return error(404, "Not Found");
+			
 			return char;
 		} catch (e) {
 			console.error(e);
@@ -31,8 +22,8 @@ const getCharacter = new Elysia().get(
 			id: t.Number(),
 		}),
 		detail: {
-			tags: ["Characters"]
-		}
+			tags: ["Characters"],
+		},
 	},
 );
 

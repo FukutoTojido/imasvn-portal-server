@@ -1,7 +1,8 @@
 import { Elysia, t } from "elysia";
-import checkToken from "../middleware";
+import { token } from "../middleware";
 
 const whep = new Elysia({ prefix: "/whep" })
+	.use(token)
 	.options(
 		"/",
 		async ({ error, set, request }) => {
@@ -41,13 +42,10 @@ const whep = new Elysia({ prefix: "/whep" })
 	)
 	.post(
 		"/",
-		async ({ body, cookie: { refresh_token }, error, set, request }) => {
+		async ({ body, error, set, request }) => {
 			if (!process.env.STREAM_ENDPOINT)
 				return error(500, "Internal Server Error");
 			try {
-				if (!(await checkToken(refresh_token.value)))
-					return error(401, "Unauthorized");
-
 				const res = await fetch(process.env.STREAM_ENDPOINT, {
 					method: "POST",
 					body: body as string,
@@ -74,7 +72,8 @@ const whep = new Elysia({ prefix: "/whep" })
 					location: res.headers.get("Location") as string,
 					"Access-Control-Allow-Headers":
 						"Authorization, Content-Type, If-Match",
-					"Access-Control-Expose-Headers": "ETag, ID, Accept-Patch, Link, Location",
+					"Access-Control-Expose-Headers":
+						"ETag, ID, Accept-Patch, Link, Location",
 					"Access-Control-Allow-Origin": request.headers.get(
 						"origin",
 					) as string,
@@ -92,9 +91,6 @@ const whep = new Elysia({ prefix: "/whep" })
 		},
 		{
 			body: t.String(),
-			cookie: t.Object({
-				refresh_token: t.Optional(t.String()),
-			}),
 			detail: {
 				tags: ["Live"],
 			},

@@ -1,6 +1,5 @@
 import { Elysia } from "elysia";
 import { getConnection } from "../connection";
-import { checkPrivillage } from "../middleware";
 
 const getProducers = new Elysia().get(
 	"/",
@@ -18,10 +17,6 @@ const getProducers = new Elysia().get(
 	{
 		detail: {
 			tags: ["Producer ID"],
-		},
-		async beforeHandle({ cookie, error }) {
-			if (!(await checkPrivillage(cookie.refresh_token.value)))
-				return error(401, "Unauthorized");
 		},
 	},
 );

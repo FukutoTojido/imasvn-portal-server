@@ -1,7 +1,6 @@
 import { Elysia, t } from "elysia";
 
 import { getConnection } from "../../connection";
-import { checkPrivillage } from "../../middleware";
 import { getImageUrl } from "../../posts/postPost";
 
 const patchCard = new Elysia().patch(
@@ -70,10 +69,6 @@ const patchCard = new Elysia().patch(
 		}),
 		detail: {
 			tags: ["Card"],
-		},
-		async beforeHandle({ cookie, error }) {
-			if (!(await checkPrivillage(cookie.refresh_token.value)))
-				return error(401, "Unauthorized");
 		},
 	},
 );

@@ -11,6 +11,7 @@
     "@aws-sdk/client-s3": "^3.750.0",
     "@aws-sdk/s3-request-presigner": "^3.750.0",
     "@elysiajs/cors": "^1.2.0",
+    "@elysiajs/jwt": "^1.4.0",
     "@elysiajs/swagger": "^1.2.0",
     "discord-oauth2": "^2.12.1",
     "elysia": "latest",

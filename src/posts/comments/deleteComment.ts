@@ -1,6 +1,5 @@
 import { Elysia, t } from "elysia";
 import { getConnection } from "../../connection";
-import checkToken from "../../middleware";
 import md5 from "md5";
 
 const deleteComment = new Elysia().delete(
@@ -34,10 +33,6 @@ const deleteComment = new Elysia().delete(
 		}),
 		detail: {
 			tags: ["Posts"],
-		},
-		async beforeHandle({ cookie, error }) {
-			if (!(await checkToken(cookie.refresh_token.value)))
-				return error(401, "Unauthorized");
 		},
 	},
 );
