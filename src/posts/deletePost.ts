@@ -1,31 +1,18 @@
+import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { Elysia, t } from "elysia";
 import { getConnection } from "../connection";
 import r2 from "../lib/r2";
-import { DeleteObjectCommand } from "@aws-sdk/client-s3";
-import md5 from "md5";
+import { token } from "../middleware";
 
-const deletePost = new Elysia().delete(
+const deletePost = new Elysia().use(token).delete(
 	"/:id",
-	async ({ params: { id }, cookie: { refresh_token }, error }) => {
+	async ({ params: { id }, error }) => {
 		try {
 			const [post] = await getConnection().query(
 				"SELECT * FROM posts WHERE id=?",
 				[id],
 			);
 			if (!post) return error(404, "Post Not Found");
-
-			const [hashed] = await getConnection().query(
-				"SELECT (hash) FROM hash_token WHERE uid=?",
-				[post.user],
-			);
-
-			if (
-				!hashed ||
-				!refresh_token.value ||
-				hashed.hash !== md5(refresh_token.value)
-			) {
-				return error(403, "Forbidden");
-			}
 
 			const images = await getConnection().query(
 				"SELECT (url) FROM images WHERE postId=?",
@@ -58,9 +45,6 @@ const deletePost = new Elysia().delete(
 	{
 		params: t.Object({
 			id: t.String(),
-		}),
-		cookie: t.Object({
-			refresh_token: t.Optional(t.String()),
 		}),
 		detail: {
 			tags: ["Posts"],

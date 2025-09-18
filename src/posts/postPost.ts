@@ -4,6 +4,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Elysia, t } from "elysia";
 import { getConnection } from "../connection";
 import r2 from "../lib/r2";
+import { token } from "../middleware";
 
 const snowflake = SnowflakeId();
 export const getImageUrl = async ({ file, uid, fileNameOverwrite }: { file: File; uid: string, fileNameOverwrite?: string }) => {
@@ -31,12 +32,12 @@ export const getImageUrl = async ({ file, uid, fileNameOverwrite }: { file: File
 	return `https://cdn.tryz.id.vn/${encodeURIComponent(fileName)}`;
 };
 
-const postPost = new Elysia().post(
+const postPost = new Elysia().use(token).post(
 	"/",
-	async ({ body, error }) => {
+	async ({ body, error, userData }) => {
 		const content = body["post-content"];
 		const images = body["post-images"] ?? [];
-		const uid = body["post-uid"];
+		const uid = userData.id;
 		const time = new Date();
 		const postId = snowflake.generate();
 

@@ -1,12 +1,12 @@
 import { SnowflakeId } from "@akashrajpurohit/snowflake-id";
 import { Elysia, t } from "elysia";
 import { getConnection } from "../../connection";
-import md5 from "md5";
+import { token } from "../../middleware";
 
 const snowflake = SnowflakeId();
-const postComment = new Elysia().post(
+const postComment = new Elysia().use(token).post(
 	"/:id/comments",
-	async ({ body, params: { id }, error, cookie }) => {
+	async ({ body, params: { id }, error, userData }) => {
 		try {
 			const [post] = await getConnection().query(
 				"SELECT * FROM posts WHERE id=?",
@@ -14,19 +14,13 @@ const postComment = new Elysia().post(
 			);
 			if (!post) return error(404, "Post Not Found");
 
-			const [user] = await getConnection().query(
-				"SELECT (uid) from hash_token WHERE hash=?",
-				[md5(cookie.refresh_token.value ?? "")],
-			);
-			if (!user) return error(401, "Unauthorized");
-
 			const content = body["comment-content"];
 			const commentId = snowflake.generate();
 			const time = new Date();
 
 			await getConnection().query(
 				"INSERT INTO `comments` (id, postDate, postId, userId, content) VALUES (?, ?, ?, ?, ?)",
-				[commentId, time, id, user.uid, content],
+				[commentId, time, id, userData.id, content],
 			);
 
 			return "Success";
