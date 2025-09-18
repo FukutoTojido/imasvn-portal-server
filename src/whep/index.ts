@@ -2,7 +2,6 @@ import { Elysia, t } from "elysia";
 import { token } from "../middleware";
 
 const whep = new Elysia({ prefix: "/whep" })
-	.use(token)
 	.options(
 		"/",
 		async ({ error, set, request }) => {
@@ -40,6 +39,7 @@ const whep = new Elysia({ prefix: "/whep" })
 			},
 		},
 	)
+	.use(token)
 	.post(
 		"/",
 		async ({ body, error, set, request }) => {
