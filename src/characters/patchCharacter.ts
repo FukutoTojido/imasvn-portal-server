@@ -40,7 +40,7 @@ const patchCharacter = new Elysia().use(privillage).patch(
 					imageColor ?? idol?.imageColor ?? null,
 					icon ?? idol?.icon ?? null,
 					age ?? idol?.age ?? null,
-                    id
+					id,
 				],
 			);
 
@@ -55,15 +55,15 @@ const patchCharacter = new Elysia().use(privillage).patch(
 			id: t.String(),
 		}),
 		body: t.Object({
-			name: t.Optional(t.String()),
-			japaneseName: t.Optional(t.String()),
-			VA: t.Optional(t.String()),
-			japaneseVA: t.Optional(t.String()),
-			birthdate: t.Optional(t.Number()),
-			birthmonth: t.Optional(t.Number()),
-			imageColor: t.Optional(t.String()),
-			icon: t.Optional(t.String()),
-			age: t.Optional(t.Number()),
+			name: t.Optional(t.Nullable(t.String())),
+			japaneseName: t.Optional(t.Nullable(t.String())),
+			VA: t.Optional(t.Nullable(t.String())),
+			japaneseVA: t.Optional(t.Nullable(t.String())),
+			birthdate: t.Optional(t.Nullable(t.Number())),
+			birthmonth: t.Optional(t.Nullable(t.Number())),
+			imageColor: t.Optional(t.Nullable(t.String())),
+			icon: t.Optional(t.Nullable(t.String())),
+			age: t.Optional(t.Nullable(t.Number())),
 		}),
 	},
 );

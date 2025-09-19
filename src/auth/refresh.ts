@@ -17,6 +17,14 @@ const refresh = new Elysia()
 				return error(401, "Unauthorized");
 			}
 
+			if (access_token) {
+				const payload = await jwtAccess.verify(access_token.value);
+				if (payload) {
+					const diff = (payload.exp ?? 0) * 1000 - Date.now();
+					if (diff > 60 * 1000) return "Success";
+				}
+			}
+
 			const payload = await jwtRefresh.verify(refresh_token.value);
 			if (!payload) {
 				return error(403, "Forbidden");
