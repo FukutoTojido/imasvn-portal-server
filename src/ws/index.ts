@@ -7,7 +7,14 @@ import {
 	type Viewer,
 } from "../types";
 
-const userSet = new Map();
+const userSet = new Map<string, Set<unknown>>();
+const instanceSet = new Map<
+	string,
+	{
+		username: string;
+		id: string;
+	}
+>();
 
 const ws = new Elysia().ws("/", {
 	open(ws) {
@@ -31,35 +38,39 @@ const ws = new Elysia().ws("/", {
 			}
 			case SOCKET_ENUM.NEW_USER: {
 				const { username, id } = payload as Viewer;
-				userSet.set(ws.id, {
-					username,
-					id,
-				});
+				if (!userSet.has(id)) {
+					userSet.set(id, new Set());
+				}
+				userSet.get(id)?.add(ws.id);
 
-				ws.publish(
-					"broadcast",
-					JSON.stringify({
-						type: SOCKET_ENUM.USER_STATE,
-						payload: {
-							username,
-							id,
-							state: State.JOIN,
-						},
-					}),
-				);
+				if (!instanceSet.has(id)) {
+					ws.publish(
+						"broadcast",
+						JSON.stringify({
+							type: SOCKET_ENUM.USER_STATE,
+							payload: {
+								username,
+								id,
+								state: State.JOIN,
+							},
+						}),
+					);
+				}
+
+				instanceSet.set(id, { username, id });
 
 				ws.publish(
 					"broadcast",
 					JSON.stringify({
 						type: SOCKET_ENUM.UPDATE_USERCOUNT,
-						payload: Array.from(userSet.values()),
+						payload: Array.from(instanceSet.values()),
 					}),
 				);
 
 				ws.send(
 					JSON.stringify({
 						type: SOCKET_ENUM.UPDATE_USERCOUNT,
-						payload: Array.from(userSet.values()),
+						payload: Array.from(instanceSet.values()),
 					}),
 				);
 				break;
@@ -69,7 +80,32 @@ const ws = new Elysia().ws("/", {
 	},
 	close(ws) {
 		// console.log(`[CLOSE]: ${ws.id}`);
-		userSet.delete(ws.id);
+
+		for (const [key, set] of userSet.entries()) {
+			if (!set.has(ws.id)) continue;
+			set.delete(ws.id);
+
+			if (set.size === 0) {
+				userSet.delete(key);
+				instanceSet.delete(key);
+			}
+		}
+
+		ws.publish(
+			"broadcast",
+			JSON.stringify({
+				type: SOCKET_ENUM.UPDATE_USERCOUNT,
+				payload: Array.from(instanceSet.values()),
+			}),
+		);
+
+		ws.send(
+			JSON.stringify({
+				type: SOCKET_ENUM.UPDATE_USERCOUNT,
+				payload: Array.from(instanceSet.values()),
+			}),
+		);
+
 		ws.unsubscribe("broadcast");
 	},
 });
