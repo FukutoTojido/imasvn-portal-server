@@ -27,7 +27,8 @@ export type JoinLeaveMessage = {
 
 export type Viewer = {
 	username: string;
-    id: string
+    id: string;
+	global_name: string;
 };
 
 export enum ROLE {

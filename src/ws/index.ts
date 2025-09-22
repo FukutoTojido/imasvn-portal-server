@@ -13,6 +13,7 @@ const instanceSet = new Map<
 	{
 		username: string;
 		id: string;
+		displayName: string;
 	}
 >();
 
@@ -37,7 +38,7 @@ const ws = new Elysia().ws("/", {
 				break;
 			}
 			case SOCKET_ENUM.NEW_USER: {
-				const { username, id } = payload as Viewer;
+				const { username, id, global_name } = payload as Viewer;
 				if (!userSet.has(id)) {
 					userSet.set(id, new Set());
 				}
@@ -57,7 +58,11 @@ const ws = new Elysia().ws("/", {
 					);
 				}
 
-				instanceSet.set(id, { username, id });
+				instanceSet.set(id, {
+					username,
+					id,
+					displayName: global_name ?? username,
+				});
 
 				ws.publish(
 					"broadcast",
