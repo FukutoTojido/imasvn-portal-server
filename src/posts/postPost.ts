@@ -34,7 +34,7 @@ export const getImageUrl = async ({ file, uid, fileNameOverwrite }: { file: File
 
 const postPost = new Elysia().use(token).post(
 	"/",
-	async ({ body, error, userData }) => {
+	async ({ body, status, userData }) => {
 		const content = body["post-content"];
 		const images = body["post-images"] ?? [];
 		const uid = userData.id;
@@ -65,7 +65,7 @@ const postPost = new Elysia().use(token).post(
 			return { postId };
 		} catch (e) {
 			console.error(e);
-			return error(500, "Internal Server Error");
+			return status(500, "Internal Server Error");
 		}
 	},
 	{

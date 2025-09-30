@@ -3,7 +3,7 @@ import { getConnection } from "../connection";
 
 const getProducer = new Elysia().get(
 	"/:id",
-	async ({ params: { id }, error }) => {
+	async ({ params: { id }, status }) => {
 		try {
 			const [producer] = await getConnection().query(
 				`SELECT id, name FROM producer_id WHERE id=?`,
@@ -13,7 +13,7 @@ const getProducer = new Elysia().get(
 				`SELECT * FROM eventParticipants INNER JOIN events ON events.id=eventParticipants.eventId WHERE eventParticipants.pid=? ORDER BY startDate DESC`,
 				[id],
 			);
-			if (!producer) return error(404, "Not Found");
+			if (!producer) return status(404, "Not Found");
 
 			return {
 				...producer,
@@ -21,7 +21,7 @@ const getProducer = new Elysia().get(
 			};
 		} catch (e) {
 			console.error(e);
-			error(500, "Internal Server Error");
+			return status(500, "Internal Server Error");
 		}
 	},
 	{

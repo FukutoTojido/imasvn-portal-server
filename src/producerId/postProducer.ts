@@ -7,7 +7,7 @@ const { randomUUID } = new ShortUniqueId({
 });
 const postProducer = new Elysia().post(
 	"/",
-	async ({ body: { name }, error }) => {
+	async ({ body: { name }, status }) => {
 		const ID = randomUUID(4);
 		try {
 			await getConnection().query(
@@ -18,7 +18,7 @@ const postProducer = new Elysia().post(
 			return ID;
 		} catch (e) {
 			console.error(e);
-			error(500, "Internal Server Error");
+			status(500, "Internal Server Error");
 		}
 	},
 	{

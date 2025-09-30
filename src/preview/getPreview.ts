@@ -3,17 +3,17 @@ import { getConnection } from "../connection";
 
 const getPreview = new Elysia().get(
 	"/preview",
-	async ({ error }) => {
+	async ({ status }) => {
 		try {
 			const [previewData] = await getConnection().query(
 				"SELECT * FROM (preview)",
 			);
 
-			if (!previewData) return error(500, "Internal Server Error");
+			if (!previewData) return status(500, "Internal Server Error");
 			return previewData;
 		} catch (e) {
 			console.error(e);
-			return error(500, "Internal Server Error");
+			return status(500, "Internal Server Error");
 		}
 	},
 	{

@@ -4,7 +4,7 @@ import { getImageUrl } from "../posts/postPost";
 
 const postEvent = new Elysia().post(
 	"/",
-	async ({ body: { name, startDate, endDate, img, ...rest }, error }) => {
+	async ({ body: { name, startDate, endDate, img, ...rest }, status }) => {
 		try {
 			await getConnection().query(
 				`INSERT INTO events (name, startDate, endDate) VALUES (?, ?, ?)`,
@@ -14,7 +14,7 @@ const postEvent = new Elysia().post(
 			const [{ id }] = await getConnection().query(
 				"SELECT MAX(id) as `id` FROM events",
 			);
-			if (!id) return error(500, "Internal Server Error");
+			if (!id) return status(500, "Internal Server Error");
 
 			const imgUrl = await getImageUrl({
 				file: img,
@@ -41,7 +41,7 @@ const postEvent = new Elysia().post(
 			return true;
 		} catch (e) {
 			console.error(e);
-			return error(500, "Internal Server Error");
+			return status(500, "Internal Server Error");
 		}
 	},
 	{

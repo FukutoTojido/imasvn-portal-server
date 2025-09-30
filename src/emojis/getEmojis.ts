@@ -3,7 +3,7 @@ import { getMongoConnection } from "../connection";
 
 const getEmojis = new Elysia().get(
 	"/",
-	async ({ query: { query }, error }) => {
+	async ({ query: { query }, status }) => {
 		try {
 			const db = getMongoConnection().db(process.env.MONGO_DB);
 			const collection = db.collection("emojis");
@@ -31,7 +31,7 @@ const getEmojis = new Elysia().get(
 				.toArray();
 		} catch (e) {
 			console.error(e);
-			return error(500, "Internal Server Error");
+			return status(500, "Internal Server Error");
 		}
 	},
 	{

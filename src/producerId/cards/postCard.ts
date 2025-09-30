@@ -7,14 +7,14 @@ const { randomUUID } = new ShortUniqueId({
 });
 const postCard = new Elysia().post(
 	"/",
-	async ({ params: { id: pid }, error }) => {
+	async ({ params: { id: pid }, status }) => {
 		const ID = randomUUID(16);
 		try {
 			const [producer] = await getConnection().query(
 				`SELECT id, name FROM producer_id WHERE id=?`,
 				[pid],
 			);
-			if (!producer) return error(404, "Producer Not Found");
+			if (!producer) return status(404, "Producer Not Found");
 
 			await getConnection().query(
 				"INSERT INTO `cards` (id, pid, name) VALUES (?, ?, ?)",
@@ -24,7 +24,7 @@ const postCard = new Elysia().post(
 			return ID;
 		} catch (e) {
 			console.error(e);
-			error(500, "Internal Server Error");
+			return status(500, "Internal Server Error");
 		}
 	},
 	{

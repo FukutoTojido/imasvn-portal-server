@@ -6,13 +6,13 @@ import { token } from "../../middleware";
 const snowflake = SnowflakeId();
 const postComment = new Elysia().use(token).post(
 	"/:id/comments",
-	async ({ body, params: { id }, error, userData }) => {
+	async ({ body, params: { id }, status, userData }) => {
 		try {
 			const [post] = await getConnection().query(
 				"SELECT * FROM posts WHERE id=?",
 				[id],
 			);
-			if (!post) return error(404, "Post Not Found");
+			if (!post) return status(404, "Post Not Found");
 
 			const content = body["comment-content"];
 			const commentId = snowflake.generate();
@@ -26,7 +26,7 @@ const postComment = new Elysia().use(token).post(
 			return "Success";
 		} catch (e) {
 			console.error(e);
-			return error(500, "Internal Server Error");
+			return status(500, "Internal Server Error");
 		}
 	},
 	{

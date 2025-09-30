@@ -3,13 +3,13 @@ import { getConnection } from "../connection";
 
 const deleteEvent = new Elysia().delete(
 	"/:id",
-	async ({ params: { id }, error }) => {
+	async ({ params: { id }, status }) => {
 		try {
 			await getConnection().query(`DELETE FROM events WHERE id=?`, [id]);
 			return true;
 		} catch (e) {
 			console.error(e);
-			return error(500, "Internal Server Error");
+			return status(500, "Internal Server Error");
 		}
 	},
 	{

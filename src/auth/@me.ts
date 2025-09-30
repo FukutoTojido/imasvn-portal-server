@@ -4,15 +4,15 @@ import { jwtAccess } from "./setup";
 
 const authMe = new Elysia().use(jwtAccess).get(
 	"/@me",
-	async ({ cookie: { access_token, refresh_token }, error, jwtAccess }) => {
+	async ({ cookie: { access_token, refresh_token }, status, jwtAccess }) => {
 		try {
 			if (!access_token.value) {
-				return error(401, "Unauthorized");
+				return status(401, "Unauthorized");
 			}
 
 			const payload = await jwtAccess.verify(access_token.value);
 			if (!payload) {
-				return error(403, "Forbidden");
+				return status(403, "Forbidden");
 			}
 
 			const { id } = payload;
@@ -26,14 +26,14 @@ const authMe = new Elysia().use(jwtAccess).get(
 				!refresh_token.value ||
 				!(await Bun.password.verify(refresh_token.value, entry.hash))
 			) {
-				return error(401, "Unauthorized");
+				return status(401, "Unauthorized");
 			}
 
 			const [user] = await getConnection().query(
 				"SELECT id, username, tag, avatar, banner, joined, role FROM `users` WHERE id=?",
 				[id],
 			);
-			if (!user) return error(403, "Forbidden");
+			if (!user) return status(403, "Forbidden");
 
 			const discordInfo = {
 				id: user.id,
@@ -48,7 +48,7 @@ const authMe = new Elysia().use(jwtAccess).get(
 			return discordInfo;
 		} catch (e) {
 			console.error(e);
-			return error(500, "Internal Server Error");
+			return status(500, "Internal Server Error");
 		}
 	},
 	{

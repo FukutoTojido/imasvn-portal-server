@@ -1,17 +1,19 @@
 import { Elysia, t } from "elysia";
 import { getConnection } from "../connection";
 
-const getCharacter = new Elysia().get(
+const deleteAnime = new Elysia().delete(
 	"/:id",
 	async ({ params: { id }, status }) => {
 		try {
-			const [char] = await getConnection().query(
-				"SELECT * FROM idols WHERE id=?",
+			const [anime] = await getConnection().query(
+				`SELECT * FROM anime WHERE id=?`,
 				[id],
 			);
-			if (!char) return status(404, "Not Found");
-			
-			return char;
+			if (!anime) return status(404, "Not Found");
+
+			await getConnection().query(`DELETE FROM anime WHERE id=?`, [id]);
+
+			return "Success";
 		} catch (e) {
 			console.error(e);
 			return status(500, "Internal Server Error");
@@ -21,10 +23,7 @@ const getCharacter = new Elysia().get(
 		params: t.Object({
 			id: t.Number(),
 		}),
-		detail: {
-			tags: ["Characters"],
-		},
 	},
 );
 
-export default getCharacter;
+export default deleteAnime;

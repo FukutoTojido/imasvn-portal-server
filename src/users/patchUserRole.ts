@@ -4,7 +4,7 @@ import { ROLE } from "../types";
 
 const patchUserRole = new Elysia().patch(
 	"/:id/roles",
-	async ({ params: { id }, body: { role }, error }) => {
+	async ({ params: { id }, body: { role }, status }) => {
 		try {
 			await getConnection().query("UPDATE users SET role=? WHERE id=?", [
 				role,
@@ -13,7 +13,7 @@ const patchUserRole = new Elysia().patch(
 			return true;
 		} catch (e) {
 			console.error(e);
-			return error(500, "Internal Server Error");
+			return status(500, "Internal Server Error");
 		}
 	},
 	{

@@ -3,7 +3,7 @@ import { getConnection } from "../connection";
 
 const getPosts = new Elysia().get(
 	"/",
-	async ({ query: { offset }, error }) => {
+	async ({ query: { offset }, status }) => {
 		try {
 			offset = (offset ?? 1) - 1;
 
@@ -46,7 +46,7 @@ const getPosts = new Elysia().get(
 			return posts;
 		} catch (e) {
 			console.error(e);
-			return error(500, "Internal Server Error");
+			return status(500, "Internal Server Error");
 		}
 	},
 	{

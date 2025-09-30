@@ -3,7 +3,7 @@ import { getMongoConnection } from "../connection";
 
 const getEmoji = new Elysia().get(
 	"/:name",
-	async ({ params: { name }, error, redirect }) => {
+	async ({ params: { name }, status, redirect }) => {
 		try {
 			const db = getMongoConnection().db(process.env.MONGO_DB);
 			const collection = db.collection("emojis");
@@ -19,7 +19,7 @@ const getEmoji = new Elysia().get(
 				},
 			);
 
-			if (!emoji) return error(404, "Emoji Not Found");
+			if (!emoji) return status(404, "Emoji Not Found");
 			if (emoji.id[0] === "-") {
 				const collection = db.collection("custom-emojis");
 				const negaEmoji = await collection.findOne(
@@ -33,14 +33,14 @@ const getEmoji = new Elysia().get(
 					},
 				);
 
-				if (!negaEmoji) return error(404, "Emoji Not Found");
+				if (!negaEmoji) return status(404, "Emoji Not Found");
 				return redirect(negaEmoji.url);
 			}
 
 			return redirect(`https://cdn.discordapp.com/emojis/${emoji.id}`);
 		} catch (e) {
 			console.error(e);
-			return error(500, "Internal Server Error");
+			return status(500, "Internal Server Error");
 		}
 	},
 	{

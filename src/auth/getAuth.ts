@@ -162,7 +162,7 @@ const getAuth = new Elysia()
 		"/",
 		async ({
 			query: { code },
-			error,
+			status,
 			redirect,
 			jwtAccess,
 			jwtRefresh,
@@ -170,7 +170,7 @@ const getAuth = new Elysia()
 		}) => {
 			try {
 				if (!code) {
-					return error(401, null);
+					return status(401, null);
 				}
 
 				const tokens = await grantToken(code);
@@ -212,7 +212,7 @@ const getAuth = new Elysia()
 				return redirect(`${import.meta.env.WEB_URL}`);
 			} catch (e) {
 				console.error(e);
-				return error(500, "Internal Server Error");
+				return status(500, "Internal Server Error");
 			}
 		},
 		{

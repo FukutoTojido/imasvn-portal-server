@@ -4,9 +4,9 @@ import { token } from "../middleware";
 const whep = new Elysia({ prefix: "/whep" })
 	.options(
 		"/",
-		async ({ error, set, request }) => {
+		async ({ status, set, request }) => {
 			if (!process.env.STREAM_ENDPOINT)
-				return error(500, "Internal Server Error");
+				return status(500, "Internal Server Error");
 
 			try {
 				const res = await fetch(process.env.STREAM_ENDPOINT, {
@@ -30,7 +30,7 @@ const whep = new Elysia({ prefix: "/whep" })
 				};
 			} catch (e) {
 				console.error(e);
-				return error(500, "Internal Server Error");
+				return status(500, "Internal Server Error");
 			}
 		},
 		{
@@ -42,9 +42,9 @@ const whep = new Elysia({ prefix: "/whep" })
 	.use(token)
 	.post(
 		"/",
-		async ({ body, error, set, request }) => {
+		async ({ body, status, set, request }) => {
 			if (!process.env.STREAM_ENDPOINT)
-				return error(500, "Internal Server Error");
+				return status(500, "Internal Server Error");
 			try {
 				const res = await fetch(process.env.STREAM_ENDPOINT, {
 					method: "POST",
@@ -59,13 +59,13 @@ const whep = new Elysia({ prefix: "/whep" })
 					case 201:
 						break;
 					case 404:
-						return error(404, "Stream Not Found");
+						return status(404, "Stream Not Found");
 					case 400:
 						return res.json().then((e) => {
-							return error(400, e.error);
+							return status(400, e.error);
 						});
 					default:
-						return error(res.status, `bad status code ${res.status}`);
+						return status(res.status, `bad status code ${res.status}`);
 				}
 
 				set.headers = {
@@ -86,7 +86,7 @@ const whep = new Elysia({ prefix: "/whep" })
 				return data;
 			} catch (e) {
 				console.error(e);
-				return error(500, "Internal Server Error");
+				return status(500, "Internal Server Error");
 			}
 		},
 		{

@@ -3,13 +3,13 @@ import { getConnection } from "../../connection";
 
 const getComments = new Elysia().get(
 	"/",
-	async ({ params: { id }, query: { offset }, error }) => {
+	async ({ params: { id }, query: { offset }, status }) => {
 		try {
 			const [post] = await getConnection().query(
 				"SELECT * FROM posts WHERE id=?",
 				[id],
 			);
-			if (!post) return error(404, "Post Not Found");
+			if (!post) return status(404, "Post Not Found");
 
 			offset = (offset ?? 1) - 1;
 			const comments = await getConnection().query(
@@ -50,7 +50,7 @@ const getComments = new Elysia().get(
 			);
 		} catch (e) {
 			console.error(e);
-			return error(500, "Internal Server Error");
+			return status(500, "Internal Server Error");
 		}
 	},
 	{

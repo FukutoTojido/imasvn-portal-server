@@ -3,7 +3,7 @@ import { getConnection } from "../connection";
 
 const getUserPosts = new Elysia().get(
 	"/:id/posts",
-	async ({ params: { id }, query: { offset }, error }) => {
+	async ({ params: { id }, query: { offset }, status }) => {
 		try {
 			offset = Math.max(0, (offset ?? 1) - 1);
 			const posts = await getConnection().query(
@@ -20,7 +20,7 @@ const getUserPosts = new Elysia().get(
 				[id, offset * 5, 5 + offset * 5],
 			);
 
-			if (!posts) return error(404, "User Not Found");
+			if (!posts) return status(404, "User Not Found");
 
 			const parsed = [];
 			for (const post of posts) {
@@ -47,7 +47,7 @@ const getUserPosts = new Elysia().get(
 			return parsed;
 		} catch (e) {
 			console.error(e);
-			error(500, "Internal Server Error");
+			return status(500, "Internal Server Error");
 		}
 	},
 	{

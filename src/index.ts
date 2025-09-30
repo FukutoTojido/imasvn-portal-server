@@ -1,16 +1,18 @@
 import cors from "@elysiajs/cors";
 import { swagger } from "@elysiajs/swagger";
 import { Elysia } from "elysia";
+import anime from "./anime";
+import episodes from "./anime/episodes";
 import auth from "./auth";
 import characters from "./characters";
 import emojis from "./emojis";
+import events from "./events";
 import posts from "./posts";
 import preview from "./preview";
 import producerId from "./producerId";
 import users from "./users";
 import whep from "./whep";
 import ws from "./ws";
-import events from "./events";
 
 const app = new Elysia({
 	websocket: {
@@ -44,7 +46,9 @@ const app = new Elysia({
 			.use(emojis)
 			.use(ws)
 			.use(producerId)
-			.use(events),
+			.use(events)
+			.use(anime)
+			.use(episodes),
 	)
 	.listen(3001);
 

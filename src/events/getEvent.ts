@@ -3,13 +3,13 @@ import { getConnection } from "../connection";
 
 const getEvent = new Elysia().get(
 	"/:id",
-	async ({ params: { id }, error }) => {
+	async ({ params: { id }, status }) => {
 		try {
 			const [event] = await getConnection().query(
 				`SELECT * FROM events WHERE id=?`,
 				[id],
 			);
-			if (!event) return error(404, "Event Not Found");
+			if (!event) return status(404, "Event Not Found");
 
 			const participants = await getConnection().query(
 				`SELECT pid FROM eventParticipants WHERE eventId=?`,
@@ -25,7 +25,7 @@ const getEvent = new Elysia().get(
 			};
 		} catch (e) {
 			console.error(e);
-			return error(500, "Internal Server Error");
+			return status(500, "Internal Server Error");
 		}
 	},
 	{

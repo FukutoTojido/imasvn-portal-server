@@ -6,7 +6,7 @@ const patchCharacter = new Elysia().use(privillage).patch(
 	"/:id",
 	async ({
 		params: { id },
-		error,
+		status,
 		body: {
 			name,
 			japaneseName,
@@ -25,7 +25,7 @@ const patchCharacter = new Elysia().use(privillage).patch(
 				[id],
 			);
 			if (!idol) {
-				return error(404, "Not Found");
+				return status(404, "Not Found");
 			}
 
 			await getConnection().query(
@@ -47,7 +47,7 @@ const patchCharacter = new Elysia().use(privillage).patch(
 			return "Success";
 		} catch (e) {
 			console.error(e);
-			return error(500, "Internal Server Error");
+			return status(500, "Internal Server Error");
 		}
 	},
 	{

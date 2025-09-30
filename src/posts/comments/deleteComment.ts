@@ -4,14 +4,14 @@ import { token } from "../../middleware";
 
 const deleteComment = new Elysia().use(token).delete(
 	"/:commentId",
-	async ({ params: { commentId }, userData, error }) => {
+	async ({ params: { commentId }, userData, status }) => {
 		const [comment] = await getConnection().query(
 			"SELECT * FROM `comments` WHERE id=?",
 			[commentId],
 		);
-		if (!comment) return error(404, "Not Found");
+		if (!comment) return status(404, "Not Found");
 
-		if (userData.id !== comment.userId) return error(403, "Forbidden");
+		if (userData.id !== comment.userId) return status(403, "Forbidden");
 
 		await getConnection().query("DELETE FROM `comments` WHERE id=?", [
 			commentId,

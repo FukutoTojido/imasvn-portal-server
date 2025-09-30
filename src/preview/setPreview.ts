@@ -3,7 +3,7 @@ import { getConnection } from "../connection";
 
 const setPreview = new Elysia().post(
 	"/preview",
-	async ({ body: { title, url }, cookie: { refresh_token }, error }) => {
+	async ({ body: { title, url }, cookie: { refresh_token }, status }) => {
 		try {
 			await getConnection().query("UPDATE `preview` SET title=?, url=?", [
 				title,
@@ -12,7 +12,7 @@ const setPreview = new Elysia().post(
 			return "Success";
 		} catch (e) {
 			console.error(e);
-			return error(500, "Internal Server Error");
+			return status(500, "Internal Server Error");
 		}
 	},
 	{

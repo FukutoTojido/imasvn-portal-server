@@ -3,7 +3,7 @@ import { getConnection } from "../connection";
 
 const getProducers = new Elysia().get(
 	"/",
-	async ({ error }) => {
+	async ({ status }) => {
 		try {
 			const producers = await getConnection().query(
 				`SELECT id, name FROM producer_id ORDER BY name`,
@@ -11,7 +11,7 @@ const getProducers = new Elysia().get(
 			return producers;
 		} catch (e) {
 			console.error(e);
-			error(500, "Internal Server Error");
+			status(500, "Internal Server Error");
 		}
 	},
 	{

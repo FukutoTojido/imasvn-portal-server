@@ -3,13 +3,13 @@ import { getConnection } from "../../connection";
 
 const deleteCard = new Elysia().delete(
 	"/:cid",
-	async ({ params: { cid }, error }) => {
+	async ({ params: { cid }, status }) => {
 		try {
 			await getConnection().query(`DELETE FROM cards WHERE id=?`, [cid]);
 			return true;
 		} catch (e) {
 			console.error(e);
-			error(500, "Internal Server Error");
+			return status(500, "Internal Server Error");
 		}
 	},
 	{

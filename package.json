@@ -15,7 +15,7 @@
     "@elysiajs/swagger": "^1.2.0",
     "@types/luxon": "^3.7.1",
     "discord-oauth2": "^2.12.1",
-    "elysia": "latest",
+    "elysia": "^1.4.9",
     "luxon": "^3.7.2",
     "mariadb": "^3.4.0",
     "md5": "^2.3.0",

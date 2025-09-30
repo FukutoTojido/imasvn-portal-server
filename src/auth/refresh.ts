@@ -9,12 +9,12 @@ const refresh = new Elysia()
 		"/refresh",
 		async ({
 			cookie: { access_token, refresh_token },
-			error,
+			status,
 			jwtRefresh,
 			jwtAccess,
 		}) => {
 			if (!refresh_token.value) {
-				return error(401, "Unauthorized");
+				return status(401, "Unauthorized");
 			}
 
 			if (access_token) {
@@ -27,7 +27,7 @@ const refresh = new Elysia()
 
 			const payload = await jwtRefresh.verify(refresh_token.value);
 			if (!payload) {
-				return error(403, "Forbidden");
+				return status(403, "Forbidden");
 			}
 
 			const id = payload.id;
@@ -37,7 +37,7 @@ const refresh = new Elysia()
 			);
 
 			if (!user) {
-				return error(403, "Forbidden");
+				return status(403, "Forbidden");
 			}
 
 			const at = await jwtAccess.sign({ id: user.id });

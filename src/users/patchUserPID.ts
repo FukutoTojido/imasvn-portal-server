@@ -3,7 +3,7 @@ import { getConnection } from "../connection";
 
 const patchUserPID = new Elysia().patch(
 	"/:id/pid",
-	async ({ params: { id }, body: { pid }, error }) => {
+	async ({ params: { id }, body: { pid }, status }) => {
 		try {
 			await getConnection().query("UPDATE users SET pid=? WHERE id=?", [
 				pid,
@@ -12,7 +12,7 @@ const patchUserPID = new Elysia().patch(
 			return true;
 		} catch (e) {
 			console.error(e);
-			return error(500, "Internal Server Error");
+			return status(500, "Internal Server Error");
 		}
 	},
 	{

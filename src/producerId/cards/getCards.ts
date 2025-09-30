@@ -3,7 +3,7 @@ import { getConnection } from "../../connection";
 
 const getCards = new Elysia().get(
 	"/",
-	async ({ params: { id }, error }) => {
+	async ({ params: { id }, status }) => {
 		try {
 			const cards = await getConnection().query(
 				`SELECT * FROM cards WHERE pid=?`,
@@ -12,7 +12,7 @@ const getCards = new Elysia().get(
 			return cards;
 		} catch (e) {
 			console.error(e);
-			error(500, "Internal Server Error");
+			return status(500, "Internal Server Error");
 		}
 	},
 	{

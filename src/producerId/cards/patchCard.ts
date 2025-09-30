@@ -5,13 +5,13 @@ import { getImageUrl } from "../../posts/postPost";
 
 const patchCard = new Elysia().patch(
 	"/:cid",
-	async ({ params: { cid }, body: { name, idol, img, title, idolJapanese, frontImg, backImg, event, config }, error }) => {
+	async ({ params: { cid }, body: { name, idol, img, title, idolJapanese, frontImg, backImg, event, config }, status }) => {
 		try {
 			const [cardInfo] = await getConnection().query(
 				"SELECT name, idol, img, title, frontImg, backImg, event, config FROM cards WHERE id=?",
 				[cid],
 			);
-			if (!cardInfo) return error(404, "Card not found");
+			if (!cardInfo) return status(404, "Card not found");
 
 			const imgUrl = img
 				? await getImageUrl({ file: img, uid: cid, fileNameOverwrite: cid })
@@ -44,7 +44,7 @@ const patchCard = new Elysia().patch(
 			return cid;
 		} catch (e) {
 			console.error(e);
-			error(500, "Internal Server Error");
+			return status(500, "Internal Server Error");
 		}
 	},
 	{

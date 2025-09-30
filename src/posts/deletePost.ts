@@ -6,13 +6,13 @@ import { token } from "../middleware";
 
 const deletePost = new Elysia().use(token).delete(
 	"/:id",
-	async ({ params: { id }, error }) => {
+	async ({ params: { id }, status }) => {
 		try {
 			const [post] = await getConnection().query(
 				"SELECT * FROM posts WHERE id=?",
 				[id],
 			);
-			if (!post) return error(404, "Post Not Found");
+			if (!post) return status(404, "Post Not Found");
 
 			const images = await getConnection().query(
 				"SELECT (url) FROM images WHERE postId=?",
@@ -39,7 +39,7 @@ const deletePost = new Elysia().use(token).delete(
 			return "Success";
 		} catch (e) {
 			console.error(e);
-			return error(500, "Internal Server Error");
+			return status(500, "Internal Server Error");
 		}
 	},
 	{

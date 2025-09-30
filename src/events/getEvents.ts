@@ -3,13 +3,13 @@ import { getConnection } from "../connection";
 
 const getEvents = new Elysia().get(
 	"/",
-	async ({ error }) => {
+	async ({ status }) => {
 		try {
 			const events = await getConnection().query(`SELECT * FROM events ORDER BY startDate DESC`);
 			return events;
 		} catch (e) {
 			console.error(e);
-			return error(500, "Internal Server Error");
+			return status(500, "Internal Server Error");
 		}
 	},
 	{

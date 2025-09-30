@@ -7,7 +7,7 @@ const patchEvent = new Elysia().patch(
 	async ({
 		params: { id },
 		body: { name, startDate, endDate, img, ...rest },
-		error,
+		status,
 	}) => {
 		try {
 			const [event] = await getConnection().query(
@@ -15,7 +15,7 @@ const patchEvent = new Elysia().patch(
 				[id],
 			);
 
-			if (!event) return error(404, "Event Not Found");
+			if (!event) return status(404, "Event Not Found");
 
 			const imgUrl = img
 				? await getImageUrl({
@@ -69,7 +69,7 @@ const patchEvent = new Elysia().patch(
 			return true;
 		} catch (e) {
 			console.error(e);
-			return error(500, "Internal Server Error");
+			return status(500, "Internal Server Error");
 		}
 	},
 	{
