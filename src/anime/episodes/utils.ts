@@ -20,6 +20,8 @@ export const saveVideo = async (file: Blob, folderName: string) => {
 		"hls",
 		"-hls_list_size",
 		"0",
+		"-hls_time",
+		"10",
 		`${cwd}/public/anime/${folderName}/video.m3u8`,
 	]);
 

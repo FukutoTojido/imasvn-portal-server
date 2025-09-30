@@ -6,11 +6,17 @@ import patchEpisode from "./patchEpisode";
 import postEpisode from "./postEpisode";
 import { privillage, token } from "../../middleware";
 import patchEpisodes from "./patchEpisodes";
+import deleteEpisode from "./deleteEpisode";
 
 const episodes = new Elysia().group("/anime/:id/episodes", (app) =>
 	app
 		.group("", (app) =>
-			app.use(privillage).use(postEpisode).use(patchEpisode).use(patchEpisodes),
+			app
+				.use(privillage)
+				.use(postEpisode)
+				.use(patchEpisode)
+				.use(patchEpisodes)
+				.use(deleteEpisode),
 		)
 		.group("", (app) =>
 			app.use(token).use(getEpisodes).use(getEpisode).use(assets),
