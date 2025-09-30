@@ -2,11 +2,7 @@ import { Elysia, t } from "elysia";
 import { getConnection } from "../../connection";
 import { saveVideo } from "./utils";
 
-const postEpisode = new Elysia({
-	serve: {
-		maxRequestBodySize: 1024 * 1024 * 300,
-	},
-}).post(
+const postEpisode = new Elysia().post(
 	"/",
 	async ({ params: { id }, body: { title, index, video }, status }) => {
 		try {

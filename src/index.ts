@@ -18,6 +18,9 @@ const app = new Elysia({
 	websocket: {
 		idleTimeout: 120,
 	},
+	serve: {
+		maxRequestBodySize: 1024 * 1024 * 300,
+	},
 })
 	.use(
 		swagger({
