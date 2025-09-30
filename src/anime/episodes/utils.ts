@@ -11,7 +11,7 @@ export const saveVideo = async (file: Blob, folderName: string) => {
 	await Bun.write(`${cwd}/public/anime/${folderName}/video`, file);
 
 	Bun.spawnSync([
-		"ffmpeg",
+		`${process.env.FFMPEG_PATH}ffmpeg`,
 		"-i",
 		`${cwd}/public/anime/${folderName}/video`,
 		"-c:v",
