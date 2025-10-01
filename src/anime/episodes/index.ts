@@ -19,8 +19,9 @@ const episodes = new Elysia().group("/anime/:id/episodes", (app) =>
 				.use(deleteEpisode),
 		)
 		.group("", (app) =>
-			app.use(token).use(getEpisodes).use(getEpisode).use(assets),
-		),
+			app.use(token).use(getEpisodes).use(getEpisode),
+		)
+		.use(assets),
 );
 
 export default episodes;
