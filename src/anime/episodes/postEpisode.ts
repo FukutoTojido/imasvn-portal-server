@@ -1,19 +1,40 @@
 import { Elysia, t } from "elysia";
 import { getConnection } from "../../connection";
-import { saveVideo } from "./utils";
+import { processQueue, saveVideo } from "./utils";
 
-const postEpisode = new Elysia().post(
+const postEpisode = new Elysia().use(processQueue).post(
 	"/",
-	async ({ params: { id }, body: { title, index, video }, status }) => {
+	async ({
+		params: { id },
+		body: { title, index, video },
+		status,
+		processQueue,
+	}) => {
 		try {
 			const episode = await getConnection().query(
-				`INSERT INTO anime_episodes (animeId, title, idx) VALUES (?, ?, ?)`,
-				[id, title, index],
+				`INSERT INTO anime_episodes (animeId, title, idx, state) VALUES (?, ?, ?, ?)`,
+				[id, title, index, 0],
 			);
 
 			const episodeId = Number(episode.insertId);
 
-			await saveVideo(video, `${id}-${episodeId}`);
+			if (video) {
+				const controller = new AbortController();
+				const key = `${id}-${episodeId}`;
+				const promise = saveVideo(video, key, controller, async () => {
+					processQueue.delete(key);
+
+					await getConnection().query(
+						`UPDATE anime_episodes SET state=? WHERE id=?`,
+						[1, episodeId],
+					);
+				});
+
+				processQueue.set(key, {
+					controller,
+					promise,
+				});
+			}
 
 			return episodeId;
 		} catch (e) {
