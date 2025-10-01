@@ -43,9 +43,7 @@ export const saveVideo = async (
 				"-hls_list_size",
 				"0",
 				"-hls_time",
-				"10",
-				"-threads",
-				"8",
+				"4",
 				`${cwd}/public/anime/${folderName}/video.m3u8`,
 			],
 			{
