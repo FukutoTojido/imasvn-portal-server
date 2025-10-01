@@ -3,7 +3,7 @@ import { getConnection } from "../connection";
 
 const getAnimes = new Elysia().get("/", async ({ status }) => {
 	try {
-		const anime = await getConnection().query(`SELECT * FROM anime`);
+		const anime = await getConnection().query(`SELECT * FROM anime ORDER BY time DESC`);
 		return anime;
 	} catch (e) {
 		console.error(e);
