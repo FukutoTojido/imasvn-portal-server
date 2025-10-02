@@ -44,6 +44,8 @@ export const saveVideo = async (
 				"0",
 				"-hls_time",
 				"4",
+				"-hls_segment_type",
+				"fmp4",
 				`${cwd}/public/anime/${folderName}/video.m3u8`,
 			],
 			{
