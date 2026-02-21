@@ -3,7 +3,7 @@ import { getConnection } from "../connection";
 
 const getProxy = new Elysia().get(
 	"/proxy",
-	async ({ params: { passphrase }, status }) => {
+	async ({ query: { passphrase }, status }) => {
 		if (passphrase !== process.env.M3U8_PASS) {
 			return status(403, "Forbidden");
 		}
@@ -19,7 +19,7 @@ const getProxy = new Elysia().get(
         return m3u8;
 	},
 	{
-		params: t.Object({
+		query: t.Object({
 			passphrase: t.String(),
 		}),
 	},
