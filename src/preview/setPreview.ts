@@ -3,7 +3,7 @@ import { getConnection } from "../connection";
 
 const setPreview = new Elysia().post(
 	"/preview",
-	async ({ body: { title, url }, cookie: { refresh_token }, status }) => {
+	async ({ body: { title, url }, status }) => {
 		try {
 			await getConnection().query("UPDATE `preview` SET title=?, url=?", [
 				title,
@@ -20,10 +20,6 @@ const setPreview = new Elysia().post(
 			title: t.String(),
 			url: t.String(),
 		}),
-		cookie: t.Object({
-			refresh_token: t.Optional(t.String()),
-		}),
-
 		detail: {
 			tags: ["Live"],
 		},

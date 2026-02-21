@@ -7,6 +7,7 @@ import auth from "./auth";
 import characters from "./characters";
 import emojis from "./emojis";
 import events from "./events";
+import hls from "./hls";
 import posts from "./posts";
 import preview from "./preview";
 import producerId from "./producerId";
@@ -51,7 +52,8 @@ const app = new Elysia({
 			.use(producerId)
 			.use(events)
 			.use(anime)
-			.use(episodes),
+			.use(episodes)
+			.use(hls),
 	)
 	.listen(3001);
 
