@@ -14,6 +14,7 @@
     "@elysiajs/jwt": "^1.4.0",
     "@elysiajs/swagger": "^1.2.0",
     "@types/luxon": "^3.7.1",
+    "axios": "^1.13.5",
     "discord-oauth2": "^2.12.1",
     "elysia": "^1.4.9",
     "luxon": "^3.7.2",
