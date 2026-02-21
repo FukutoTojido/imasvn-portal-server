@@ -8,15 +8,15 @@ const getProxy = new Elysia().get(
 			return status(403, "Forbidden");
 		}
 
-		const [m3u8] = await getConnection().query(
+		const [entry] = await getConnection().query(
 			`SELECT * FROM (hls_url)`,
 		);
 
-        if (!m3u8) {
+        if (!entry?.m3u8) {
             return status(404, "Not Found");
         }
 
-        return m3u8;
+        return entry.m3u8;
 	},
 	{
 		query: t.Object({
