@@ -1,28 +1,15 @@
-import axios from "axios";
-import { Elysia, t } from "elysia";
+import { Elysia } from "elysia";
 import { getConnection } from "../connection";
+import { token } from "../middleware";
 
-const getProxy = new Elysia().get(
-	"/proxy",
-	async ({ query: { passphrase }, status }) => {
-		if (passphrase !== process.env.M3U8_PASS) {
-			return status(403, "Forbidden");
-		}
+const getProxy = new Elysia().use(token).get("/proxy", async ({ status }) => {
+	const [entry] = await getConnection().query(`SELECT * FROM (hls_url)`);
 
-		const [entry] = await getConnection().query(`SELECT * FROM (hls_url)`);
+	if (!entry?.m3u8) {
+		return status(404, "Not Found");
+	}
 
-		if (!entry?.m3u8) {
-			return status(404, "Not Found");
-		}
-
-		const { data } = await axios.get(entry.m3u8);
-		return data;
-	},
-	{
-		query: t.Object({
-			passphrase: t.String(),
-		}),
-	},
-);
+	return entry.m3u8;
+});
 
 export default getProxy;
