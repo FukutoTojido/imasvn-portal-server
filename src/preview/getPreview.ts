@@ -9,8 +9,10 @@ const getPreview = new Elysia().get(
 				"SELECT * FROM (preview)",
 			);
 
+			const [entry] = await getConnection().query(`SELECT * FROM (hls_url)`);
+
 			if (!previewData) return status(500, "Internal Server Error");
-			return previewData;
+			return { ...previewData, m3u8: entry?.m3u8 };
 		} catch (e) {
 			console.error(e);
 			return status(500, "Internal Server Error");
