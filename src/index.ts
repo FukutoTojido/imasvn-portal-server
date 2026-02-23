@@ -54,7 +54,7 @@ const app = new Elysia({
 			.use(anime)
 			.use(episodes)
 			.use(hls)
-			.get("/loop", () => file("public/loop/ittai.m3u8")),
+			.get("/loop/ittai.m3u8", () => file("public/loop/ittai.m3u8")),
 	)
 	.listen(3001);
 
