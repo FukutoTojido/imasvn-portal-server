@@ -1,6 +1,6 @@
 import cors from "@elysiajs/cors";
 import { swagger } from "@elysiajs/swagger";
-import { Elysia, file } from "elysia";
+import { Elysia, file, t } from "elysia";
 import anime from "./anime";
 import episodes from "./anime/episodes";
 import auth from "./auth";
@@ -54,7 +54,11 @@ const app = new Elysia({
 			.use(anime)
 			.use(episodes)
 			.use(hls)
-			.get("/loop/ittai.m3u8", () => file("public/loop/ittai.m3u8")),
+			.get(
+				"/loop/:assets",
+				({ params: { assets } }) => file(`public/loop/${assets}`),
+				{ params: t.Object({ assets: t.String() }) },
+			),
 	)
 	.listen(3001);
 
