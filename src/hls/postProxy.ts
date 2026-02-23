@@ -6,7 +6,7 @@ const postProxy = new Elysia().use(privillage).post(
 	"/proxy",
 	async ({ body: { url }, status }) => {
 		try {
-			await getConnection().query("UPDATE `hls_url` SET url=?", [url]);
+			await getConnection().query("UPDATE `hls_url` SET m3u8=?", [url]);
 			return "Success";
 		} catch (e) {
 			console.error(e);
