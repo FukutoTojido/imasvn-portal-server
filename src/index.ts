@@ -27,7 +27,7 @@ const app = new Elysia({
 		swagger({
 			documentation: {
 				tags: [
-					{ name: "Auth" },
+					{ name: "Authentication" },
 					{ name: "Users" },
 					{ name: "Posts" },
 					{ name: "Characters" },
@@ -44,7 +44,6 @@ const app = new Elysia({
 			.use(auth)
 			.use(users)
 			.use(posts)
-			.use(whep)
 			.use(preview)
 			.use(characters)
 			.use(emojis)
@@ -53,11 +52,15 @@ const app = new Elysia({
 			.use(events)
 			.use(anime)
 			.use(episodes)
+			.use(whep)
 			.use(hls)
 			.get(
 				"/loop/:assets",
 				({ params: { assets } }) => file(`public/loop/${assets}`),
-				{ params: t.Object({ assets: t.String() }) },
+				{
+					params: t.Object({ assets: t.String() }),
+					detail: { tags: ["Assets"] },
+				},
 			),
 	)
 	.listen(3001);

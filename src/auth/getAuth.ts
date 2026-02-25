@@ -220,7 +220,7 @@ const getAuth = new Elysia()
 				code: t.Optional(t.String()),
 			}),
 			detail: {
-				tags: ["Auth"],
+				tags: ["Authentication"],
 			},
 			cookie: t.Object({
 				access_token: t.Optional(t.String()),

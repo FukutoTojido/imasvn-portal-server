@@ -57,7 +57,7 @@ const authMe = new Elysia().use(jwtAccess).get(
 			refresh_token: t.Optional(t.String()),
 		}),
 		detail: {
-			tags: ["Auth"],
+			tags: ["Authentication"],
 		},
 	},
 );

@@ -1,11 +1,14 @@
 import { Elysia } from "elysia";
-import login from "./login";
 import authMe from "./@me";
 import getAuth from "./getAuth";
-import refresh from "./refresh";
+import login from "./login";
 import logOut from "./logOut";
+import refresh from "./refresh";
 
-const auth = new Elysia({ prefix: "/auth" })
+const auth = new Elysia({
+	prefix: "/auth",
+	detail: { tags: ["Authentication"] },
+})
 	.use(getAuth)
 	.use(refresh)
 	.use(login)

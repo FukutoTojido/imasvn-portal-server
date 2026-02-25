@@ -1,10 +1,13 @@
 import { Elysia } from "elysia";
-import getCharacters from "./getCharacters";
-import getCharacter from "./getCharacter";
-import patchCharacter from "./patchCharacter";
 import deleteCharacter from "./deleteCharacter";
+import getCharacter from "./getCharacter";
+import getCharacters from "./getCharacters";
+import patchCharacter from "./patchCharacter";
 
-const characters = new Elysia({ prefix: "characters" })
+const characters = new Elysia({
+	prefix: "characters",
+	detail: { tags: ["Characters"] },
+})
 	.use(getCharacters)
 	.use(getCharacter)
 	.use(patchCharacter)

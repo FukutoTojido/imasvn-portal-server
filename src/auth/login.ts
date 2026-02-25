@@ -8,7 +8,7 @@ const login = new Elysia().get(
 	},
 	{
 		detail: {
-			tags: ["Auth"],
+			tags: ["Authentication"],
 		},
 	},
 );
