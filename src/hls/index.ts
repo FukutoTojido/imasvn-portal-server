@@ -4,6 +4,7 @@ import {
 	deleteProxies,
 	getAllProxies,
 	getProxies,
+	getProxiesPreview,
 	patchProxies,
 	postProxies,
 } from "./proxies";
@@ -14,7 +15,9 @@ const hls = new Elysia({
 	},
 }).group("/hls", (app) =>
 	app
-		.group("", (app) => app.use(token).use(getAllProxies).use(getProxies))
+		.use(getAllProxies)
+		.use(getProxies)
+		.use(getProxiesPreview)
 		.group("", (app) =>
 			app.use(privillage).use(postProxies).use(patchProxies).use(deleteProxies),
 		),
