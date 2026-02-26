@@ -1,4 +1,4 @@
-import { Elysia } from "elysia";
+import { Elysia, t } from "elysia";
 import {
 	type JoinLeaveMessage,
 	type Message,
@@ -7,22 +7,63 @@ import {
 	type Viewer,
 } from "../types";
 
-const userSet = new Map<string, Set<unknown>>();
-const instanceSet = new Map<
+const roomSet = new Map<
 	string,
 	{
-		username: string;
-		id: string;
-		displayName: string;
+		userSet: Map<string, Set<unknown>>;
+		instanceSet: Map<
+			string,
+			{
+				username: string;
+				id: string;
+				displayName: string;
+			}
+		>;
 	}
 >();
 
-const ws = new Elysia().ws("/", {
-	open(ws) {
+const ws = new Elysia().ws("/:roomId?", {
+	open: ({
+		subscribe,
+		data: {
+			params: { roomId = "root" },
+		},
+	}) => {
 		// console.log(`[OPEN]: ${ws.id}`);
-		ws.subscribe("broadcast");
+		subscribe(roomId);
+		
+		if (!roomSet.has(roomId)) {
+			roomSet.set(roomId, {
+				userSet: new Map<string, Set<unknown>>(),
+				instanceSet: new Map<
+					string,
+					{
+						username: string;
+						id: string;
+						displayName: string;
+					}
+				>(),
+			});
+			console.log(`Created room: ${roomId}`);
+		}
 	},
-	message(ws, message) {
+	message: (
+		{
+			send,
+			publish,
+			id: wsId,
+			data: {
+				params: { roomId = "root" },
+			},
+		},
+		message,
+	) => {
+		const room = roomSet.get(roomId);
+		if (!room) return;
+
+		const userSet = room.userSet;
+		const instanceSet = room.instanceSet;
+
 		const { type, payload } = message as {
 			type: SOCKET_ENUM;
 			payload: Message | JoinLeaveMessage | Viewer;
@@ -33,20 +74,21 @@ const ws = new Elysia().ws("/", {
 				break;
 			}
 			case SOCKET_ENUM.NEW_MESSAGE: {
-				ws.send(JSON.stringify(message));
-				ws.publish("broadcast", JSON.stringify(message));
+				send(JSON.stringify(message));
+				publish(roomId, JSON.stringify(message));
 				break;
 			}
 			case SOCKET_ENUM.NEW_USER: {
 				const { username, id, global_name } = payload as Viewer;
+
 				if (!userSet.has(id)) {
 					userSet.set(id, new Set());
 				}
-				userSet.get(id)?.add(ws.id);
+				userSet.get(id)?.add(wsId);
 
 				if (!instanceSet.has(id)) {
-					ws.publish(
-						"broadcast",
+					publish(
+						roomId,
 						JSON.stringify({
 							type: SOCKET_ENUM.USER_STATE,
 							payload: {
@@ -64,15 +106,15 @@ const ws = new Elysia().ws("/", {
 					displayName: global_name ?? username,
 				});
 
-				ws.publish(
-					"broadcast",
+				publish(
+					roomId,
 					JSON.stringify({
 						type: SOCKET_ENUM.UPDATE_USERCOUNT,
 						payload: Array.from(instanceSet.values()),
 					}),
 				);
 
-				ws.send(
+				send(
 					JSON.stringify({
 						type: SOCKET_ENUM.UPDATE_USERCOUNT,
 						payload: Array.from(instanceSet.values()),
@@ -83,36 +125,58 @@ const ws = new Elysia().ws("/", {
 		}
 		// console.log(`[MESSAGE]: ${ws.id} - ${JSON.stringify(message)}`);
 	},
-	close(ws) {
+	close: ({
+		publish,
+		id,
+		send,
+		unsubscribe,
+		data: {
+			params: { roomId = "root" },
+		},
+	}) => {
 		// console.log(`[CLOSE]: ${ws.id}`);
+		const room = roomSet.get(roomId);
+		if (!room) return;
 
-		for (const [key, set] of userSet.entries()) {
-			if (!set.has(ws.id)) continue;
-			set.delete(ws.id);
+		const userSet = room.userSet;
+		const instanceSet = room.instanceSet;
+
+		for (const [key, set] of userSet?.entries() ?? []) {
+			if (!set.has(id)) continue;
+			set.delete(id);
 
 			if (set.size === 0) {
-				userSet.delete(key);
-				instanceSet.delete(key);
+				userSet?.delete(key);
+				instanceSet?.delete(key);
 			}
 		}
 
-		ws.publish(
-			"broadcast",
+		publish(
+			roomId,
 			JSON.stringify({
 				type: SOCKET_ENUM.UPDATE_USERCOUNT,
-				payload: Array.from(instanceSet.values()),
+				payload: Array.from(instanceSet?.values() ?? []),
 			}),
 		);
 
-		ws.send(
+		send(
 			JSON.stringify({
 				type: SOCKET_ENUM.UPDATE_USERCOUNT,
-				payload: Array.from(instanceSet.values()),
+				payload: Array.from(instanceSet?.values() ?? []),
 			}),
 		);
 
-		ws.unsubscribe("broadcast");
+
+		if (!instanceSet.size) {
+			roomSet.delete(roomId);
+			console.log(`Deleted room: ${roomId}`);
+		}
+
+		unsubscribe(roomId);
 	},
+	params: t.Object({
+		roomId: t.Optional(t.String()),
+	}),
 });
 
 export default ws;
