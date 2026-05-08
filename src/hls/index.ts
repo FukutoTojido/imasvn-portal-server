@@ -1,5 +1,6 @@
 import { Elysia } from "elysia";
 import { privillage, token } from "../middleware";
+import DRM, { DRMData } from "./drm";
 import {
 	deleteProxies,
 	getAllProxies,
@@ -18,8 +19,14 @@ const hls = new Elysia({
 		.use(getAllProxies)
 		.use(getProxies)
 		.use(getProxiesPreview)
+		.group("", (app) => app.use(token).use(DRM))
 		.group("", (app) =>
-			app.use(privillage).use(postProxies).use(patchProxies).use(deleteProxies),
+			app
+				.use(privillage)
+				.use(postProxies)
+				.use(patchProxies)
+				.use(deleteProxies)
+				.use(DRMData),
 		),
 );
 
