@@ -6,13 +6,14 @@ import getCards from "./getCards";
 import patchCard from "./patchCard";
 import postCard from "./postCard";
 
-const cards = new Elysia().group("/:id/cards", (app) =>
-	app
-		.use(getCards)
-		.use(getCard)
-		.group("", (app) =>
-			app.use(privillage).use(postCard).use(patchCard).use(deleteCard),
-		),
-);
+const cards = new Elysia()
+	.group("/:id/cards", (app) =>
+		app
+			.use(getCards)
+			.use(getCard)
+			.group("", (app) =>
+				app.use(privillage).use(postCard).use(patchCard).use(deleteCard),
+			),
+	);
 
 export default cards;
