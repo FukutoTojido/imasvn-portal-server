@@ -1,27 +1,38 @@
 import { Elysia, t } from "elysia";
 import { getConnection } from "../connection";
 import { token } from "../middleware";
+import { ROLE } from "../types";
 
-const getAllProxies = new Elysia().use(token).get("/proxies", async ({ status }) => {
-	try {
-		const entries = await getConnection().query(
-			"SELECT id, name, thumbnail FROM (hls_url)",
-		);
-		return entries;
-	} catch (e) {
-		console.error(e);
-		return status(500, "Internal Server Error");
-	}
-});
+const getAllProxies = new Elysia()
+	.use(token)
+	.get("/proxies", async ({ status, userData }) => {
+		try {
+			const entries =
+				userData.role !== ROLE.ADMIN
+					? await getConnection().query(
+							"SELECT id, name, thumbnail, stream_type FROM (hls_url)",
+						)
+					: await getConnection().query("SELECT * FROM (hls_url)");
+			return entries;
+		} catch (e) {
+			console.error(e);
+			return status(500, "Internal Server Error");
+		}
+	});
 
 const getProxies = new Elysia().use(token).get(
 	"/proxies/:id",
-	async ({ params: { id }, status }) => {
+	async ({ params: { id }, status, userData }) => {
 		try {
-			const [entry] = await getConnection().query(
-				`SELECT * FROM (hls_url) WHERE id=?`,
-				[id],
-			);
+			const [entry] =
+				userData.role !== ROLE.ADMIN
+					? await getConnection().query(
+							`SELECT id, name, thumbnail, stream_type FROM (hls_url) WHERE id=?`,
+							[id],
+						)
+					: await getConnection().query(`SELECT * FROM (hls_url) WHERE id=?`, [
+							id,
+						]);
 
 			if (!entry) {
 				return status(404, "Not Found");
@@ -64,15 +75,18 @@ const getProxiesPreview = new Elysia().get(
 			id: t.String(),
 		}),
 	},
-); 
+);
 
 const postProxies = new Elysia().post(
 	"/proxies",
-	async ({ body: { id, url, name, thumbnail }, status }) => {
+	async ({
+		body: { id, url, name, thumbnail, stream_type, cookies, headers },
+		status,
+	}) => {
 		try {
 			await getConnection().query(
-				"INSERT INTO `hls_url` (id, m3u8, name, thumbnail) VALUES (?, ?, ?, ?)",
-				[id, url, name, thumbnail],
+				"INSERT INTO `hls_url` (id, m3u8, name, thumbnail, stream_type, cookies, headers) VALUES (?, ?, ?, ?, ?, ?, ?)",
+				[id, url, name, thumbnail, stream_type, cookies, headers],
 			);
 			return "Success";
 		} catch (e) {
@@ -86,17 +100,24 @@ const postProxies = new Elysia().post(
 			url: t.Optional(t.String()),
 			name: t.Optional(t.String()),
 			thumbnail: t.Optional(t.String()),
+			stream_type: t.Optional(t.String()),
+			cookies: t.Optional(t.String()),
+			headers: t.Optional(t.String()),
 		}),
 	},
 );
 
 const patchProxies = new Elysia().patch(
 	"/proxies/:id",
-	async ({ body: { url, name, thumbnail }, params: { id }, status }) => {
+	async ({
+		body: { url, name, thumbnail, stream_type, cookies, headers },
+		params: { id },
+		status,
+	}) => {
 		try {
 			await getConnection().query(
-				"UPDATE `hls_url` SET m3u8=?, name=?, thumbnail=? WHERE id=?",
-				[url, name, thumbnail, id],
+				"UPDATE `hls_url` SET m3u8=?, name=?, thumbnail=?, stream_type=?, cookies=?, headers=? WHERE id=?",
+				[url, name, thumbnail, stream_type, cookies, headers, id],
 			);
 			return "Success";
 		} catch (e) {
@@ -112,6 +133,9 @@ const patchProxies = new Elysia().patch(
 			url: t.Optional(t.String()),
 			name: t.Optional(t.String()),
 			thumbnail: t.Optional(t.String()),
+			stream_type: t.Optional(t.String()),
+			cookies: t.Optional(t.String()),
+			headers: t.Optional(t.String()),
 		}),
 	},
 );
@@ -138,4 +162,11 @@ const deleteProxies = new Elysia().delete(
 	},
 );
 
-export { getAllProxies, getProxies, getProxiesPreview, postProxies, patchProxies, deleteProxies };
+export {
+	getAllProxies,
+	getProxies,
+	getProxiesPreview,
+	postProxies,
+	patchProxies,
+	deleteProxies,
+};

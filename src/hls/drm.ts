@@ -1,6 +1,6 @@
+import axios from "axios";
 import { Elysia, t } from "elysia";
 import { getConnection } from "../connection";
-import axios from "axios";
 
 const DRM = new Elysia({
 	detail: {
@@ -8,15 +8,23 @@ const DRM = new Elysia({
 	},
 })
 	.post(
-		"/drm",
-		async ({ body, status }) => {
+		"/drm/:id",
+		async ({ body, status, params: { id } }) => {
 			try {
 				const [entry] = await getConnection().query(
-					`SELECT mpd, cookies, cond FROM (ooi)`,
+					`SELECT * FROM (hls_url) WHERE id=?`,
+					[id],
 				);
 				if (!entry) {
 					return status(500, "Internal Server Error");
 				}
+
+				const customHeaders = Object.entries(JSON.parse(entry.headers)).reduce<
+					Record<string, string>
+				>((accm, [key, value]) => {
+					accm[key] = JSON.stringify(value);
+					return accm;
+				}, {});
 
 				const licenseUrl = process.env.X_LICENSE ?? "";
 				const response = await fetch(licenseUrl, {
@@ -24,7 +32,6 @@ const DRM = new Elysia({
 					body: body as ArrayBuffer,
 					headers: {
 						cookie: entry.cookies,
-						"X-Condition": entry.cond,
 						Host: process.env.X_HOST ?? "",
 						"User-Agent":
 							"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0",
@@ -40,6 +47,7 @@ const DRM = new Elysia({
 						"Sec-Fetch_Dest": "empty",
 						TE: "trailers",
 						Connection: "keep-alive",
+						...customHeaders,
 					},
 				});
 
@@ -59,23 +67,11 @@ const DRM = new Elysia({
 			body: t.Optional(t.Any()),
 		},
 	)
-	.get("/mpd", async ({ status }) => {
-		try {
-			const [entry] = await getConnection().query(`SELECT mpd FROM (ooi)`);
-
-			if (!entry) {
-				return status(404, "Not Found");
-			}
-
-			return entry;
-		} catch (e) {
-			console.error(e);
-			return status(500, "Internal Server Error");
-		}
-	})
 	.get("/token", async ({ status }) => {
 		try {
-			const { data: bearer } = await axios.get(`${process.env.TOKEN_URL}?t=${Date.now()}`);
+			const { data: bearer } = await axios.get(
+				`${process.env.TOKEN_URL}?t=${Date.now()}`,
+			);
 			return bearer;
 		} catch (e) {
 			console.error(e);
@@ -83,52 +79,4 @@ const DRM = new Elysia({
 		}
 	});
 
-const DRMData = new Elysia({
-	detail: {
-		tags: ["Live"],
-	},
-})
-	.get("/ooi", async ({ status }) => {
-		try {
-			const [entry] = await getConnection().query(
-				`SELECT mpd, cookies, cond FROM (ooi)`,
-			);
-
-			if (!entry) {
-				return status(404, "Not Found");
-			}
-
-			return entry;
-		} catch (e) {
-			console.error(e);
-			return status(500, "Internal Server Error");
-		}
-	})
-	.post(
-		"/ooi",
-		async ({ body: { mpd, cookies, cond }, status }) => {
-			try {
-				await getConnection().query(
-					"UPDATE `ooi` SET mpd=?, cookies=?, cond=?",
-					[mpd, cookies, cond],
-				);
-				return {
-					cookies,
-					cond,
-				};
-			} catch (e) {
-				console.error(e);
-				return status(500, "Internal Server Error");
-			}
-		},
-		{
-			body: t.Object({
-				mpd: t.String(),
-				cookies: t.String(),
-				cond: t.String(),
-			}),
-		},
-	);
-
 export default DRM;
-export { DRMData };
