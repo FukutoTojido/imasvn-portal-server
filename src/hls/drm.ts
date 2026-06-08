@@ -1,5 +1,6 @@
 import { Elysia, t } from "elysia";
 import { getConnection } from "../connection";
+import axios from "axios";
 
 const DRM = new Elysia({
 	detail: {
@@ -67,6 +68,15 @@ const DRM = new Elysia({
 			}
 
 			return entry;
+		} catch (e) {
+			console.error(e);
+			return status(500, "Internal Server Error");
+		}
+	})
+	.get("/token", async ({ status }) => {
+		try {
+			const { data: bearer } = await axios.get(`${process.env.TOKEN_URL}?t=${Date.now()}`);
+			return bearer;
 		} catch (e) {
 			console.error(e);
 			return status(500, "Internal Server Error");
