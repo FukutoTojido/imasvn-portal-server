@@ -27,7 +27,7 @@ const getProxies = new Elysia().use(token).get(
 			const [entry] =
 				userData.role !== ROLE.ADMIN
 					? await getConnection().query(
-							`SELECT id, name, thumbnail, stream_type FROM (hls_url) WHERE id=?`,
+							`SELECT id, name, thumbnail, stream_type, m3u8 FROM (hls_url) WHERE id=?`,
 							[id],
 						)
 					: await getConnection().query(`SELECT * FROM (hls_url) WHERE id=?`, [
