@@ -3,13 +3,13 @@ import { token } from "../middleware";
 
 const whep = new Elysia({ prefix: "/whep" })
 	.options(
-		"/",
-		async ({ status, set, request }) => {
+		"/:id",
+		async ({ status, set, request, params: { id } }) => {
 			if (!process.env.STREAM_ENDPOINT)
 				return status(500, "Internal Server Error");
 
 			try {
-				const res = await fetch(process.env.STREAM_ENDPOINT, {
+				const res = await fetch(`${process.env.STREAM_ENDPOINT}/${id}/whep`, {
 					method: "OPTIONS",
 				});
 
@@ -34,6 +34,9 @@ const whep = new Elysia({ prefix: "/whep" })
 			}
 		},
 		{
+			params: t.Object({
+				id: t.String(),
+			}),
 			detail: {
 				tags: ["Live"],
 			},
@@ -41,12 +44,13 @@ const whep = new Elysia({ prefix: "/whep" })
 	)
 	.use(token)
 	.post(
-		"/",
-		async ({ body, status, set, request }) => {
+		"/:id",
+		async ({ body, status, set, request, params: { id } }) => {
 			if (!process.env.STREAM_ENDPOINT)
 				return status(500, "Internal Server Error");
+				
 			try {
-				const res = await fetch(process.env.STREAM_ENDPOINT, {
+				const res = await fetch(`${process.env.STREAM_ENDPOINT}/${id}/whep`, {
 					method: "POST",
 					body: body as string,
 					headers: {
@@ -90,6 +94,9 @@ const whep = new Elysia({ prefix: "/whep" })
 			}
 		},
 		{
+			params: t.Object({
+				id: t.String(),
+			}),
 			body: t.String(),
 			detail: {
 				tags: ["Live"],
