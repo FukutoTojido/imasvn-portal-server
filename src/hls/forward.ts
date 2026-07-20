@@ -15,7 +15,7 @@ const forward = new Elysia().group("/forward", (app) =>
 					return status(500, "Internal Server Error");
 				}
 
-				const response = await fetch(`${entry.headers}/${resource}`, {
+				const response = await fetch(`${entry.forward_url}/${resource}`, {
 					method: "GET",
 					headers: {
 						cookie: entry.cookies,
