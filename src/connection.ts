@@ -9,7 +9,7 @@ const pool = mariadb.createPool({
 	allowPublicKeyRetrieval: true
 });
 
-const uri = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PWD}@${process.env.MONGO_HOST}:${process.env.MONGO_PORT}/${process.env.MONGO_PARAMS}`;
+const uri = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PWD}@${process.env.MONGO_HOST}:${process.env.MONGO_PORT}/${process.env.MONGO_PARAMS ?? ""}`;
 const client = new MongoClient(uri);
 await client.connect();
 

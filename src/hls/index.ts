@@ -1,13 +1,14 @@
 import { Elysia } from "elysia";
 import { privillage, token } from "../middleware";
 import DRM from "./drm";
+import forward from "./forward";
 import {
-	deleteProxies,
-	getAllProxies,
-	getProxies,
-	getProxiesPreview,
-	patchProxies,
-	postProxies,
+    deleteProxies,
+    getAllProxies,
+    getProxies,
+    getProxiesPreview,
+    patchProxies,
+    postProxies,
 } from "./proxies";
 
 const hls = new Elysia({
@@ -16,6 +17,7 @@ const hls = new Elysia({
 	},
 }).group("/hls", (app) =>
 	app
+		.use(forward)
 		.use(getAllProxies)
 		.use(getProxies)
 		.use(getProxiesPreview)
