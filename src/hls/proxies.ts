@@ -10,9 +10,11 @@ const getAllProxies = new Elysia()
 			const entries =
 				userData.role !== ROLE.ADMIN
 					? await getConnection().query(
-							"SELECT id, name, thumbnail, stream_type FROM (hls_url) ORDER BY date DESC",
+							"SELECT id, name, thumbnail, stream_type, date, branch FROM (hls_url) ORDER BY date DESC",
 						)
-					: await getConnection().query("SELECT * FROM (hls_url) ORDER BY date DESC");
+					: await getConnection().query(
+							"SELECT * FROM (hls_url) ORDER BY date DESC",
+						);
 			return entries;
 		} catch (e) {
 			console.error(e);
@@ -80,13 +82,37 @@ const getProxiesPreview = new Elysia().get(
 const postProxies = new Elysia().post(
 	"/proxies",
 	async ({
-		body: { id, url, name, thumbnail, stream_type, cookies, headers, archive, date, forward_url },
+		body: {
+			id,
+			url,
+			name,
+			thumbnail,
+			stream_type,
+			cookies,
+			headers,
+			archive,
+			date,
+			forward_url,
+			branch,
+		},
 		status,
 	}) => {
 		try {
 			await getConnection().query(
-				"INSERT INTO `hls_url` (id, m3u8, name, thumbnail, stream_type, cookies, headers, archive, date, forward_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-				[id, url, name, thumbnail, stream_type, cookies, headers, archive, date, forward_url],
+				"INSERT INTO `hls_url` (id, m3u8, name, thumbnail, stream_type, cookies, headers, archive, date, forward_url, branch) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+				[
+					id,
+					url,
+					name,
+					thumbnail,
+					stream_type,
+					cookies,
+					headers,
+					archive,
+					date,
+					forward_url,
+					branch,
+				],
 			);
 			return "Success";
 		} catch (e) {
@@ -105,7 +131,8 @@ const postProxies = new Elysia().post(
 			headers: t.Optional(t.String()),
 			archive: t.Optional(t.Boolean()),
 			date: t.Optional(t.Date()),
-			forward_url: t.Optional(t.String())
+			forward_url: t.Optional(t.String()),
+			branch: t.Optional(t.Number()),
 		}),
 	},
 );
@@ -113,14 +140,37 @@ const postProxies = new Elysia().post(
 const patchProxies = new Elysia().patch(
 	"/proxies/:id",
 	async ({
-		body: { url, name, thumbnail, stream_type, cookies, headers, archive, date, forward_url },
+		body: {
+			url,
+			name,
+			thumbnail,
+			stream_type,
+			cookies,
+			headers,
+			archive,
+			date,
+			forward_url,
+			branch
+		},
 		params: { id },
 		status,
 	}) => {
 		try {
 			await getConnection().query(
-				"UPDATE `hls_url` SET m3u8=?, name=?, thumbnail=?, stream_type=?, cookies=?, headers=?, archive=?, date=?, forward_url=? WHERE id=?",
-				[url, name, thumbnail, stream_type, cookies, headers, archive, date, forward_url, id],
+				"UPDATE `hls_url` SET m3u8=?, name=?, thumbnail=?, stream_type=?, cookies=?, headers=?, archive=?, date=?, forward_url=?, branch=? WHERE id=?",
+				[
+					url,
+					name,
+					thumbnail,
+					stream_type,
+					cookies,
+					headers,
+					archive,
+					date,
+					forward_url,
+					branch,
+					id,
+				],
 			);
 			return "Success";
 		} catch (e) {
@@ -141,7 +191,8 @@ const patchProxies = new Elysia().patch(
 			headers: t.Optional(t.String()),
 			archive: t.Optional(t.Boolean()),
 			date: t.Optional(t.Date()),
-			forward_url: t.Optional(t.String())
+			forward_url: t.Optional(t.String()),
+			branch: t.Optional(t.Number()),
 		}),
 	},
 );
@@ -169,10 +220,10 @@ const deleteProxies = new Elysia().delete(
 );
 
 export {
+	deleteProxies,
 	getAllProxies,
 	getProxies,
 	getProxiesPreview,
-	postProxies,
 	patchProxies,
-	deleteProxies,
+	postProxies,
 };
