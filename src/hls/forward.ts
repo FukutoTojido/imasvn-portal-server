@@ -15,10 +15,18 @@ const forward = new Elysia().group("/forward", (app) =>
 					return status(500, "Internal Server Error");
 				}
 
+				const customHeaders = Object.entries(
+					JSON.parse(entry.headers || "{}"),
+				).reduce<Record<string, string>>((accm, [key, value]) => {
+					accm[key] = JSON.stringify(value);
+					return accm;
+				}, {});
+
 				const response = await fetch(`${entry.forward_url}/${resource}`, {
 					method: "GET",
 					headers: {
 						cookie: entry.cookies,
+						...customHeaders,
 					},
 				});
 
@@ -37,4 +45,4 @@ const forward = new Elysia().group("/forward", (app) =>
 	),
 );
 
-export default forward
+export default forward;
