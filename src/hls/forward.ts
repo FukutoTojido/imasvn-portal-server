@@ -30,7 +30,7 @@ const forward = new Elysia().group("/forward", (app) =>
 					},
 				});
 
-				return status(200, response);
+				return status(response.status, response);
 			} catch (e) {
 				console.error(e);
 				return status(500, "Error hehe");
