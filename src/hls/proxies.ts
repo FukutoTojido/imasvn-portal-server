@@ -10,7 +10,7 @@ const getAllProxies = new Elysia()
 			const entries =
 				userData.role !== ROLE.ADMIN
 					? await getConnection().query(
-							"SELECT id, name, thumbnail, stream_type, date, branch FROM (hls_url) ORDER BY date DESC",
+							"SELECT id, name, thumbnail, stream_type, date, branch, archive FROM (hls_url) ORDER BY date DESC",
 						)
 					: await getConnection().query(
 							"SELECT * FROM (hls_url) ORDER BY date DESC",
