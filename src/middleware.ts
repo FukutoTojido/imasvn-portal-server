@@ -56,3 +56,23 @@ export const privillage = new Elysia()
 
 		return { userData };
 	});
+
+export const uac = new Elysia()
+	.use(jwtAccess)
+	.derive({ as: "scoped" }, async ({ jwtAccess, cookie: { access_token } }) => {
+		if (!access_token.value) {
+			throw new Error("Unauthorized");
+		}
+
+		const payload = await jwtAccess.verify(access_token.value);
+		if (!payload) {
+			return { role: null }
+		}
+
+		const [userData] = await getConnection().query(
+			"SELECT * FROM users WHERE id=?",
+			[payload.id],
+		);
+
+		return { userData };
+	});

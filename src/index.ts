@@ -14,6 +14,7 @@ import producerId from "./producerId";
 import users from "./users";
 import whep from "./whep";
 import ws from "./ws";
+import live from "./live";
 
 const app = new Elysia({
 	websocket: {
@@ -54,6 +55,7 @@ const app = new Elysia({
 			.use(episodes)
 			.use(whep)
 			.use(hls)
+			.use(live)
 			.get(
 				"/loop/:assets",
 				({ params: { assets } }) => file(`public/loop/${assets}`),
