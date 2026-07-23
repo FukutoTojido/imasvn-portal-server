@@ -35,6 +35,7 @@ const insertEvent = async (
 			event_slug: _event,
 			date: _date,
 			thumbnail: _thumb,
+			public: _public
 		} = entry ?? {};
 
 		const {
@@ -43,13 +44,14 @@ const insertEvent = async (
 			event_slug = _event ?? null,
 			date = _date ?? null,
 			thumbnail = _thumb ?? null,
+			public: __public = _public ?? false
 		} = props;
 
 		await getConnection().query(
 			update
-				? "UPDATE `live_events` SET name=?, thumbnail=?, date=?, ip_slug=?, event_slug=? WHERE slug=?"
-				: "INSERT INTO `live_events` (name, thumbnail, date, ip_slug, event_slug, slug) VALUES (?, ?, ?, ?, ?, ?)",
-			[name, thumbnail, date, ip_slug, event_slug, slug],
+				? "UPDATE `live_events` SET name=?, thumbnail=?, date=?, ip_slug=?, event_slug=?, public=? WHERE slug=?"
+				: "INSERT INTO `live_events` (name, thumbnail, date, ip_slug, event_slug, public, slug) VALUES (?, ?, ?, ?, ?, ?, ?)",
+			[name, thumbnail, date, ip_slug, event_slug, __public, slug],
 		);
 
 		return {
@@ -59,6 +61,7 @@ const insertEvent = async (
 			date,
 			ip_slug,
 			event_slug,
+			public: __public
 		};
 	} catch (e) {
 		console.error(e);
@@ -211,6 +214,7 @@ const events = new Elysia().group("/events", (app) =>
 							event_slug: t.Optional(t.String()),
 							thumbnail: t.Optional(t.String()),
 							date: t.Optional(t.Date()),
+							public: t.Optional(t.Boolean())
 						}),
 					},
 				)
