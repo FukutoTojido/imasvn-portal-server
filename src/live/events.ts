@@ -256,7 +256,7 @@ const events = new Elysia().group("/events", (app) =>
 			},
 		)
 		.group("", (app) =>
-			app.use(privillage).get("/", async ({ status }) => {
+			app.use(token).get("/", async ({ status }) => {
 				try {
 					const entries = await getConnection().query(
 						"SELECT * FROM live_events ORDER BY date DESC",
