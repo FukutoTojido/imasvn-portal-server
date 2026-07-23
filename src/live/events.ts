@@ -5,6 +5,7 @@ import { getConnection } from "../connection";
 import { privillage, token } from "../middleware";
 import archives, { insertArchive } from "./archives";
 import { insertChannel } from "./channels";
+import { ROLE } from "../types";
 
 type LiveEventDto = {
 	slug: string;
@@ -13,6 +14,7 @@ type LiveEventDto = {
 	event_slug?: string | null;
 	date?: Date | null;
 	thumbnail?: string | null;
+	public?: boolean;
 };
 
 const insertEvent = async (
@@ -256,10 +258,12 @@ const events = new Elysia().group("/events", (app) =>
 			},
 		)
 		.group("", (app) =>
-			app.use(token).get("/", async ({ status }) => {
+			app.use(token).get("/", async ({ status, userData }) => {
 				try {
 					const entries = await getConnection().query(
-						"SELECT * FROM live_events ORDER BY date DESC",
+						userData.role === ROLE.ADMIN
+							? "SELECT * FROM live_events ORDER BY date DESC"
+							: "SELECT * FROM live_events WHERE public=TRUE ORDER BY date DESC",
 					);
 					return status(200, entries);
 				} catch (e) {
