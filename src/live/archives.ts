@@ -3,6 +3,7 @@ import Elysia, { t } from "elysia";
 import { DateTime } from "luxon";
 import { getConnection } from "../connection";
 import { privillage, token } from "../middleware";
+import { ROLE } from "../types";
 import channels, { insertChannel } from "./channels";
 
 type LiveArchiveDto = {
@@ -11,6 +12,7 @@ type LiveArchiveDto = {
 	broadcast_slug?: string;
 	broadcast_name?: string;
 	broadcast_date?: Date | null;
+	public?: boolean | null;
 };
 
 export const refreshArchive = async ({
@@ -56,6 +58,7 @@ export const refreshArchive = async ({
 				broadcast_date,
 				broadcast_slug,
 				broadcast_name,
+				public: entry.public,
 			},
 			true,
 		);
@@ -114,22 +117,25 @@ export const insertArchive = async (
 			broadcast_slug: _broadcast_slug,
 			broadcast_name: _broadcast_name,
 			broadcast_date: _broadcast_date,
+			public: _public,
 		} = entry ?? {};
 
 		const {
 			broadcast_slug = _broadcast_slug ?? null,
 			broadcast_name = _broadcast_name ?? null,
 			broadcast_date = _broadcast_date ?? null,
+			public: __public = _public ?? false,
 		} = props;
 
 		await getConnection().query(
 			update
-				? "UPDATE `live_archives` SET broadcast_slug=?, broadcast_name=?, broadcast_date=? WHERE id=?"
+				? "UPDATE `live_archives` SET broadcast_slug=?, broadcast_name=?, broadcast_date=?, public=? WHERE id=?"
 				: "INSERT INTO `live_archives` (broadcast_slug, broadcast_name, broadcast_date, event_id) VALUES (?, ?, ?, ?)",
 			[
 				broadcast_slug,
 				broadcast_name,
 				broadcast_date,
+				__public,
 				...(!update ? [event_id] : []),
 				...(update ? [id] : []),
 			],
@@ -219,6 +225,7 @@ const archives = new Elysia().group("/:slug/archives", (app) =>
 							broadcast_slug: t.Optional(t.String()),
 							broadcast_name: t.Optional(t.String()),
 							broadcast_date: t.Optional(t.Date()),
+							public: t.Optional(t.Boolean()),
 						}),
 					},
 				)
@@ -270,10 +277,12 @@ const archives = new Elysia().group("/:slug/archives", (app) =>
 		.group("", (app) =>
 			app.use(token).get(
 				"/",
-				async ({ status, params: { slug } }) => {
+				async ({ status, params: { slug }, userData }) => {
 					try {
 						const entries = await getConnection().query(
-							"SELECT * FROM live_archives WHERE event_id=?",
+							userData.role === ROLE.ADMIN
+								? "SELECT * FROM live_archives WHERE event_id=?"
+								: "SELECT * FROM live_archives WHERE event_id=? AND public=TRUE",
 							[slug],
 						);
 						return status(200, entries);
