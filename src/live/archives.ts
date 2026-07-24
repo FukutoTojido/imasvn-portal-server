@@ -13,6 +13,7 @@ type LiveArchiveDto = {
 	broadcast_name?: string;
 	broadcast_date?: Date | null;
 	public?: boolean | null;
+	archive?: boolean | null;
 };
 
 export const refreshArchive = async ({
@@ -34,11 +35,12 @@ export const refreshArchive = async ({
 		if (!entry || !event) return null;
 
 		const {
-			data: { archives },
+			data,
 		} = await axios.get(
-			`${process.env.X_BASE_URL}/${slug}/${process.env.X_ARCHIVES}`,
+			`${process.env.X_BASE_URL}/${slug}/${entry.archive ? process.env.X_ARCHIVES : process.env.X_BROADCASTS}`,
 		);
-		const archive = archives.find(
+		const lists = entry.archive ? data.archives : data.broadcasts;
+		const archive = lists.find(
 			(a: LiveArchiveDto) => a.broadcast_slug === entry.broadcast_slug,
 		);
 		if (!archive) return null;
@@ -59,6 +61,7 @@ export const refreshArchive = async ({
 				broadcast_slug,
 				broadcast_name,
 				public: entry.public,
+				archive: entry.archive,
 			},
 			true,
 		);
@@ -118,6 +121,7 @@ export const insertArchive = async (
 			broadcast_name: _broadcast_name,
 			broadcast_date: _broadcast_date,
 			public: _public,
+			archive: _archive,
 		} = entry ?? {};
 
 		const {
@@ -125,19 +129,19 @@ export const insertArchive = async (
 			broadcast_name = _broadcast_name ?? null,
 			broadcast_date = _broadcast_date ?? null,
 			public: __public = _public ?? false,
+			archive = _archive ?? false,
 		} = props;
 
 		await getConnection().query(
 			update
-				? "UPDATE `live_archives` SET broadcast_slug=?, broadcast_name=?, broadcast_date=?, public=? WHERE id=?"
+				? "UPDATE `live_archives` SET broadcast_slug=?, broadcast_name=?, broadcast_date=?, public=?, archive=? WHERE id=?"
 				: "INSERT INTO `live_archives` (broadcast_slug, broadcast_name, broadcast_date, event_id) VALUES (?, ?, ?, ?)",
 			[
 				broadcast_slug,
 				broadcast_name,
 				broadcast_date,
-				__public,
 				...(!update ? [event_id] : []),
-				...(update ? [id] : []),
+				...(update ? [__public, archive, id] : []),
 			],
 		);
 
@@ -147,6 +151,8 @@ export const insertArchive = async (
 			broadcast_slug,
 			broadcast_name,
 			broadcast_date,
+			__public,
+			archive,
 		};
 	} catch (e) {
 		console.error(e);
@@ -226,6 +232,7 @@ const archives = new Elysia().group("/:slug/archives", (app) =>
 							broadcast_name: t.Optional(t.String()),
 							broadcast_date: t.Optional(t.Date()),
 							public: t.Optional(t.Boolean()),
+							archive: t.Optional(t.Boolean()),
 						}),
 					},
 				)

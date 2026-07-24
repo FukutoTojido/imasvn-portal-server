@@ -42,12 +42,12 @@ const refresh = new Elysia()
 
 			const at = await jwtAccess.sign({ id: user.id });
 			const rt = await jwtRefresh.sign({ id: user.id });
-			const hashed = await Bun.password.hash(rt);
+			// const hashed = await Bun.password.hash(rt);
 
-			await getConnection().query(
-				"INSERT INTO `hash_token` (uid, hash) VALUES (?, ?) ON DUPLICATE KEY UPDATE hash=?",
-				[user.id, hashed, hashed],
-			);
+			// await getConnection().query(
+			// 	"INSERT INTO `hash_token` (uid, hash) VALUES (?, ?) ON DUPLICATE KEY UPDATE hash=?",
+			// 	[user.id, hashed, hashed],
+			// );
 
 			const atExpire = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 			const rtExpire = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);

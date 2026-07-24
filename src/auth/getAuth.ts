@@ -183,12 +183,12 @@ const getAuth = new Elysia()
 
 				const at = await jwtAccess.sign({ id: discordInfo.id });
 				const rt = await jwtRefresh.sign({ id: discordInfo.id });
-				const hashed = await Bun.password.hash(rt);
+				// const hashed = await Bun.password.hash(rt);
 
-				await getConnection().query(
-					"INSERT INTO `hash_token` (uid, hash) VALUES (?, ?) ON DUPLICATE KEY UPDATE hash=?",
-					[discordInfo.id, hashed, hashed],
-				);
+				// await getConnection().query(
+				// 	"INSERT INTO `hash_token` (uid, hash) VALUES (?, ?) ON DUPLICATE KEY UPDATE hash=?",
+				// 	[discordInfo.id, hashed, hashed],
+				// );
 
 				const atExpire = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 				const rtExpire = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);

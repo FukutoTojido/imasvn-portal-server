@@ -17,17 +17,17 @@ const authMe = new Elysia().use(jwtAccess).get(
 
 			const { id } = payload;
 
-			const [entry] = await getConnection().query(
-				"SELECT hash FROM hash_token WHERE uid=?",
-				[id],
-			);
-			if (
-				!entry ||
-				!refresh_token.value ||
-				!(await Bun.password.verify(refresh_token.value, entry.hash))
-			) {
-				return status(401, "Unauthorized");
-			}
+			// const [entry] = await getConnection().query(
+			// 	"SELECT hash FROM hash_token WHERE uid=?",
+			// 	[id],
+			// );
+			// if (
+			// 	// !entry ||
+			// 	// !refresh_token.value 
+			// 	// !(await Bun.password.verify(refresh_token.value, entry.hash))
+			// ) {
+			// 	return status(401, "Unauthorized");
+			// }
 
 			const [user] = await getConnection().query(
 				"SELECT id, username, tag, avatar, banner, joined, role FROM `users` WHERE id=?",

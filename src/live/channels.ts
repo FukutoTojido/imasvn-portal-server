@@ -14,7 +14,6 @@ type LiveChannelDto = {
 	forward_url?: string | null;
 	cookies?: string | null;
 	headers?: string | null;
-	archive?: boolean;
 };
 
 export const insertChannel = async (
@@ -37,7 +36,6 @@ export const insertChannel = async (
 			forward_url: _forward_url,
 			cookies: _cookies,
 			headers: _headers,
-			archive: _archive,
 		} = entry ?? {};
 
 		const {
@@ -48,13 +46,12 @@ export const insertChannel = async (
 			forward_url = _forward_url ?? null,
 			cookies = _cookies ?? null,
 			headers = _headers ?? null,
-			archive = _archive ?? false,
 		} = props;
 
 		await getConnection().query(
 			update
-				? "UPDATE `live_channels` SET channel_id=?, channel_name=?, stream_type=?, url=?, forward_url=?, cookies=?, headers=?, archive=? WHERE id=?"
-				: "INSERT INTO `live_channels` (channel_id, channel_name, stream_type, url, forward_url, cookies, headers, archive, event_id, broadcast_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+				? "UPDATE `live_channels` SET channel_id=?, channel_name=?, stream_type=?, url=?, forward_url=?, cookies=?, headers=? WHERE id=?"
+				: "INSERT INTO `live_channels` (channel_id, channel_name, stream_type, url, forward_url, cookies, headers, event_id, broadcast_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			[
 				channel_id,
 				channel_name,
@@ -63,7 +60,6 @@ export const insertChannel = async (
 				forward_url,
 				cookies,
 				headers,
-				archive,
 				...(!update ? [event_id, broadcast_id] : []),
 				...(update ? [id] : []),
 			],
@@ -80,7 +76,6 @@ export const insertChannel = async (
 			forward_url,
 			cookies,
 			headers,
-			archive,
 		};
 	} catch (e) {
 		console.error(e);
@@ -151,7 +146,6 @@ const channels = new Elysia().group("/:broadcast_id/channels", (app) =>
 							forward_url: t.Optional(t.Nullable(t.String())),
 							cookies: t.Optional(t.Nullable(t.String())),
 							headers: t.Optional(t.Nullable(t.String())),
-							archive: t.Optional(t.Boolean()),
 						}),
 					},
 				)
@@ -188,7 +182,7 @@ const channels = new Elysia().group("/:broadcast_id/channels", (app) =>
 							const [entry] = await getConnection().query(
 								userData.role === ROLE.ADMIN
 									? "SELECT * FROM `live_channels` WHERE id=?"
-									: "SELECT id, channel_id, channel_name, url, stream_type, archive FROM `live_channels` WHERE id=?",
+									: "SELECT id, channel_id, channel_name, url, stream_type FROM `live_channels` WHERE id=?",
 								id,
 							);
 
@@ -214,7 +208,7 @@ const channels = new Elysia().group("/:broadcast_id/channels", (app) =>
 							const entries = await getConnection().query(
 								userData.role === ROLE.ADMIN
 									? "SELECT * FROM live_channels WHERE event_id=? AND broadcast_id=?"
-									: "SELECT id, channel_id, channel_name, url, stream_type, archive FROM live_channels WHERE event_id=? AND broadcast_id=?",
+									: "SELECT id, channel_id, channel_name, url, stream_type FROM live_channels WHERE event_id=? AND broadcast_id=?",
 								[slug, broadcast_id],
 							);
 							return status(200, entries);
