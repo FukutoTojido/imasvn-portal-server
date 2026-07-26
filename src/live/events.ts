@@ -3,9 +3,9 @@ import Elysia, { t } from "elysia";
 import { DateTime } from "luxon";
 import { getConnection } from "../connection";
 import { privillage, token } from "../middleware";
+import { ROLE } from "../types";
 import archives, { insertArchive } from "./archives";
 import { insertChannel } from "./channels";
-import { ROLE } from "../types";
 
 type LiveEventDto = {
 	slug: string;

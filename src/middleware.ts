@@ -26,7 +26,9 @@ export const token = new Elysia()
 
 			if (!userData.joined) {
 				set.status = 403;
-				throw new Error("Please join the iDOLM@STER Vietnam Discord server to gain access");
+				throw new Error(
+					"Please join the iDOLM@STER Vietnam Discord server to gain access",
+				);
 			}
 
 			return { userData };
@@ -61,12 +63,12 @@ export const uac = new Elysia()
 	.use(jwtAccess)
 	.derive({ as: "scoped" }, async ({ jwtAccess, cookie: { access_token } }) => {
 		if (!access_token.value) {
-			throw new Error("Unauthorized");
+			return { userData: { role: null } };
 		}
 
 		const payload = await jwtAccess.verify(access_token.value);
 		if (!payload) {
-			return { role: null }
+			return { userData: { role: null } };
 		}
 
 		const [userData] = await getConnection().query(
