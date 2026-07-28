@@ -49,7 +49,7 @@ export const refreshArchive = async ({
 			? DateTime.fromFormat(archive.performance_date, "yyyy-MM-dd", {
 					zone: "utc",
 				}).toJSDate()
-			: DateTime.fromISO(event.date).toJSDate();
+			: DateTime.fromJSDate(event.date).toJSDate();
 
 		const result = await insertArchive(
 			{

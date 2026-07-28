@@ -100,6 +100,7 @@ const events = new Elysia().group("/events", (app) =>
 								event_slug,
 								thumbnail: event_thumbnail_image,
 								date: DateTime.fromISO(event_start_date).toJSDate(),
+								public: false,
 							};
 
 							const result = await insertEvent(eventData);
