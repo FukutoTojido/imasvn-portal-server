@@ -24,7 +24,7 @@ const deleteEpisode = new Elysia()
 				const res = await b0131.send(
 					new ListObjectsV2Command({
 						Bucket: process.env.B0131_BUCKET_NAME,
-						Prefix: `${id}/${episode}/`,
+						Prefix: `${process.env.B0131_CDN_PREFIX || ""}anime/${id}/${episode}/`,
 					}),
 				);
 
@@ -57,7 +57,7 @@ const deleteEpisode = new Elysia()
 				const res = await b0131.send(
 					new ListObjectsV2Command({
 						Bucket: process.env.B0131_BUCKET_NAME,
-						Prefix: `anime/${id}/${episode}/`,
+						Prefix: `${process.env.B1031_CDN_PREFIX || ""}anime/${id}/${episode}/`,
 					}),
 				);
 
