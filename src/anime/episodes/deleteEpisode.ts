@@ -1,50 +1,84 @@
-import { rmSync } from "node:fs";
+import { DeleteObjectsCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { Elysia, t } from "elysia";
 import { getConnection } from "../../connection";
+import { b0131 } from "../../lib/r2";
 import { processQueue } from "./utils";
 
-const deleteEpisode = new Elysia().use(processQueue).delete(
-	"/:episode",
-	async ({ params: { id, episode }, status, processQueue }) => {
-		try {
-			const [anime] = await getConnection().query(
-				`SELECT * FROM anime_episodes WHERE id=? AND animeId=?`,
-				[episode, id],
-			);
-			if (!anime) return status(404, "Not Found");
+const deleteEpisode = new Elysia()
+	.use(processQueue)
+	.delete(
+		"/:episode",
+		async ({ params: { id, episode }, status }) => {
+			try {
+				const [anime] = await getConnection().query(
+					`SELECT * FROM anime_episodes WHERE id=? AND animeId=?`,
+					[episode, id],
+				);
+				if (!anime) return status(404, "Not Found");
 
-			await getConnection().query(
-				`DELETE FROM anime_episodes WHERE id=? AND animeId=?`,
-				[episode, id],
-			);
+				await getConnection().query(
+					`DELETE FROM anime_episodes WHERE id=? AND animeId=?`,
+					[episode, id],
+				);
 
-			const key = `${id}-${episode}`;
-			const pair = processQueue.get(key);
-			if (pair) {
-				console.log(`[ANIME][${key}]: Found running instance! Aborting...`);
-				const { promise, controller } = pair;
+				const res = await b0131.send(
+					new ListObjectsV2Command({
+						Bucket: process.env.B0131_BUCKET_NAME,
+						Prefix: `${id}/${episode}/`,
+					}),
+				);
 
-				controller.abort();
-				await promise;
+				const { Deleted } = await b0131.send(
+					new DeleteObjectsCommand({
+						Bucket: process.env.B0131_BUCKET_NAME,
+						Delete: {
+							Objects: res.Contents?.map((content) => ({ Key: content.Key })),
+						},
+					}),
+				);
+
+				return Deleted;
+			} catch (e) {
+				console.error(e);
+				return status(500, "Internal Server Error");
 			}
+		},
+		{
+			params: t.Object({
+				id: t.Number(),
+				episode: t.Number(),
+			}),
+		},
+	)
+	.delete(
+		"/:episode/contents",
+		async ({ params: { id, episode }, status }) => {
+			try {
+				const res = await b0131.send(
+					new ListObjectsV2Command({
+						Bucket: process.env.B0131_BUCKET_NAME,
+						Prefix: `anime/${id}/${episode}/`,
+					}),
+				);
 
-			rmSync(`${process.cwd()}/public/anime/${key}/`, {
-				recursive: true,
-				force: true,
-			});
+				const { Deleted } = await b0131.send(
+					new DeleteObjectsCommand({
+						Bucket: process.env.B0131_BUCKET_NAME,
+						Delete: {
+							Objects: res.Contents?.map((content) => ({ Key: content.Key })),
+						},
+					}),
+				);
 
-			return "Success";
-		} catch (e) {
-			console.error(e);
-			return status(500, "Internal Server Error");
-		}
-	},
-	{
-		params: t.Object({
-			id: t.Number(),
-			episode: t.Number(),
-		}),
-	},
-);
+				return Deleted;
+			} catch (e) {
+				console.error(e);
+				return status(500, "Internal Server Error");
+			}
+		},
+		{
+			params: t.Object({ id: t.Number(), episode: t.Number() }),
+		},
+	);
 
 export default deleteEpisode;
