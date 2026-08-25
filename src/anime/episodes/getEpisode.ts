@@ -15,7 +15,7 @@ const getEpisode = new Elysia().get(
 			const res = await b0131.send(
 				new ListObjectsV2Command({
 					Bucket: process.env.B0131_BUCKET_NAME,
-					Prefix: `${process.env.B0131_CDN_PREFIX}anime/${id}/${episode}/`,
+					Prefix: `${process.env.B0131_CDN_PREFIX || ""}anime/${id}/${episode}/`,
 				}),
 			);
 
